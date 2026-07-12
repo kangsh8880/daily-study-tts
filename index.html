@@ -2,299 +2,237 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>🔊</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{
-  font-family:'Segoe UI','Noto Sans KR',Arial,sans-serif;
-  background:#F0F4F8;
-  min-height:100vh;
-  padding:16px;
-}
-
-/* ─── 단일 재생 모드 (이메일 링크) ─── */
-#single{
-  max-width:380px;
-  margin:0 auto;
-  padding-top:20px;
-}
-.toast{
-  background:#fff;
-  border-radius:14px;
-  box-shadow:0 4px 20px rgba(0,0,0,.12);
-  padding:28px 24px;
-  text-align:center;
-}
-.flag{font-size:48px;margin-bottom:10px;}
-.lang-name{font-size:11px;font-weight:bold;color:#95A5A6;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase;}
-.phrase{font-size:22px;font-weight:bold;color:#2C3E50;line-height:1.4;margin-bottom:24px;word-break:break-word;}
-.play-big{
-  width:70px;height:70px;
-  background:linear-gradient(135deg,#1E8449,#27AE60);
-  border:none;border-radius:50%;
-  color:#fff;font-size:28px;
-  cursor:pointer;
-  box-shadow:0 4px 14px rgba(39,174,96,.35);
-  transition:transform .12s;
-  display:inline-flex;align-items:center;justify-content:center;
-}
-.play-big:active{transform:scale(.93);}
-.play-big.playing{background:linear-gradient(135deg,#117A65,#1ABC9C);}
-.status{font-size:12px;color:#7F8C8D;margin-top:14px;min-height:18px;}
-.close-hint{font-size:11px;color:#BDC3C7;margin-top:10px;}
-
-/* 파동 애니메이션 */
-.ripple{
-  display:none;
-  width:100px;height:100px;
-  margin:0 auto 16px;
-  position:relative;
-}
-.ripple.active{display:block;}
-.ripple span{
-  position:absolute;
-  border:2px solid #27AE60;
-  border-radius:50%;
-  animation:ripple 1.5s ease-out infinite;
-  opacity:0;
-}
-.ripple span:nth-child(1){width:50px;height:50px;top:25px;left:25px;animation-delay:0s;}
-.ripple span:nth-child(2){width:70px;height:70px;top:15px;left:15px;animation-delay:.4s;}
-.ripple span:nth-child(3){width:90px;height:90px;top:5px;left:5px;animation-delay:.8s;}
-@keyframes ripple{0%{transform:scale(.5);opacity:.8;}100%{transform:scale(1);opacity:0;}}
-
-/* ─── 전체 문장 모드 ─── */
-.header{
-  background:linear-gradient(135deg,#1A3A5C,#2980B9);
-  border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#fff;text-align:center;
-}
-.header h1{font-size:18px;font-weight:bold;margin-bottom:3px;}
-.header p{font-size:11px;opacity:.75;}
-.ctrl{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;}
-.ctrl label{font-size:13px;color:#555;}
-.ctrl input[type=range]{width:110px;accent-color:#2980B9;}
-.ctrl .sv{font-size:13px;color:#2980B9;font-weight:bold;min-width:32px;}
-.play-all-btn{
-  display:block;width:100%;padding:11px;margin-bottom:12px;
-  background:linear-gradient(135deg,#1E8449,#27AE60);color:#fff;
-  border:none;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;
-  box-shadow:0 3px 10px rgba(39,174,96,.3);
-}
-.play-all-btn:disabled{opacity:.5;cursor:not-allowed;}
-.status-bar{text-align:center;font-size:12px;color:#7F8C8D;padding:6px;min-height:20px;margin-bottom:8px;}
-.card{background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.07);margin-bottom:12px;overflow:hidden;}
-.card-num{background:#EBF5FB;padding:6px 14px;font-size:10px;font-weight:bold;color:#1A5276;letter-spacing:.5px;}
-.lang-row{
-  display:flex;align-items:center;gap:10px;padding:9px 14px;
-  border-bottom:1px solid #F0F4F8;cursor:pointer;transition:background .12s;
-}
-.lang-row:last-child{border-bottom:none;}
-.lang-row:hover{background:#F8FBFE;}
-.lang-row.playing{background:#EBF5FB;}
-.lg-badge{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
-.lg-info{flex:1;min-width:0;}
-.lg-lbl{font-size:10px;color:#95A5A6;font-weight:bold;margin-bottom:1px;}
-.lg-txt{font-size:13px;color:#2C3E50;font-weight:500;word-break:break-word;}
-.lg-rom{font-size:11px;color:#7F8C8D;margin-top:1px;}
-.lg-btn{width:32px;height:32px;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
-.lg-btn:active{transform:scale(.9);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI','Noto Sans KR',Arial,sans-serif;background:#F0F4F8;min-height:100vh;padding:16px}
+/* ── 단일재생 모드 ── */
+#single{max-width:360px;margin:0 auto;padding-top:16px}
+.card{background:#fff;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.1);padding:24px;text-align:center}
+.flag{font-size:44px;margin-bottom:8px}
+.lang-name{font-size:10px;font-weight:bold;color:#95A5A6;letter-spacing:1px;margin-bottom:6px;text-transform:uppercase}
+.phrase{font-size:21px;font-weight:bold;color:#2C3E50;line-height:1.4;margin-bottom:20px;word-break:break-word}
+.play-big{width:64px;height:64px;background:linear-gradient(135deg,#1E8449,#27AE60);border:none;border-radius:50%;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 12px rgba(39,174,96,.35);display:inline-flex;align-items:center;justify-content:center;transition:transform .1s}
+.play-big:active{transform:scale(.93)}
+.play-big.playing{background:linear-gradient(135deg,#117A65,#1ABC9C)}
+.status{font-size:12px;color:#7F8C8D;margin-top:12px;min-height:18px}
+/* 파동 */
+.wave-wrap{display:none;width:80px;height:80px;margin:0 auto 12px;position:relative}
+.wave-wrap.on{display:block}
+.wave-wrap span{position:absolute;border:2px solid #27AE60;border-radius:50%;animation:rpl 1.4s ease-out infinite;opacity:0}
+.wave-wrap span:nth-child(1){width:44px;height:44px;top:18px;left:18px;animation-delay:0s}
+.wave-wrap span:nth-child(2){width:62px;height:62px;top:9px;left:9px;animation-delay:.35s}
+.wave-wrap span:nth-child(3){width:80px;height:80px;top:0;left:0;animation-delay:.7s}
+@keyframes rpl{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1);opacity:0}}
+/* ── 전체문장 모드 ── */
+.header{background:linear-gradient(135deg,#1A3A5C,#2980B9);border-radius:12px;padding:16px 20px;margin-bottom:14px;color:#fff;text-align:center}
+.header h1{font-size:17px;font-weight:bold;margin-bottom:2px}
+.header p{font-size:11px;opacity:.75}
+.ctrl{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px}
+.ctrl label{font-size:12px;color:#555}
+.ctrl input[type=range]{width:100px;accent-color:#2980B9}
+.sv{font-size:12px;color:#2980B9;font-weight:bold;min-width:30px}
+.pa-btn{display:block;width:100%;padding:10px;margin-bottom:10px;background:linear-gradient(135deg,#1E8449,#27AE60);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:bold;cursor:pointer;box-shadow:0 3px 8px rgba(39,174,96,.28)}
+.pa-btn:disabled{opacity:.5;cursor:not-allowed}
+.sb{text-align:center;font-size:11px;color:#7F8C8D;padding:5px;min-height:18px;margin-bottom:6px}
+.pcard{background:#fff;border-radius:9px;box-shadow:0 2px 7px rgba(0,0,0,.07);margin-bottom:10px;overflow:hidden}
+.pcard-num{background:#EBF5FB;padding:5px 13px;font-size:10px;font-weight:bold;color:#1A5276;letter-spacing:.4px}
+.lr{display:flex;align-items:center;gap:9px;padding:8px 13px;border-bottom:1px solid #F0F4F8;cursor:pointer;transition:background .12s}
+.lr:last-child{border-bottom:none}
+.lr:hover{background:#F8FBFE}
+.lr.playing{background:#EBF5FB}
+.lb{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.li{flex:1;min-width:0}
+.ll{font-size:9px;color:#95A5A6;font-weight:bold;margin-bottom:1px}
+.lt{font-size:13px;font-weight:500;word-break:break-word}
+.lrm{font-size:10px;color:#7F8C8D;margin-top:1px}
+.lg-btn{width:30px;height:30px;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.lg-btn:active{transform:scale(.9)}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script>
-const synth = window.speechSynthesis;
-const params = new URLSearchParams(location.search);
+var synth = window.speechSynthesis;
+var params = new URLSearchParams(location.search);
+var root = document.getElementById('root');
 
-const LANG_META = {
-  'ko-KR':{ label:'한국어',   flag:'🇰🇷', color:'#2C3E50', bg:'#F8F9FA' },
-  'vi-VN':{ label:'베트남어', flag:'🇻🇳', color:'#1A6B9A', bg:'#EBF5FB' },
-  'en-US':{ label:'영어',     flag:'🇺🇸', color:'#27AE60', bg:'#F0FAF4' },
-  'zh-CN':{ label:'중국어',   flag:'🇨🇳', color:'#C0392B', bg:'#FEF9F9' },
-  'ja-JP':{ label:'일본어',   flag:'🇯🇵', color:'#7D3C98', bg:'#F8F4FD' },
+var META = {
+  'ko-KR':{label:'한국어',  flag:'🇰🇷',color:'#2C3E50',bg:'#F8F9FA'},
+  'vi-VN':{label:'베트남어',flag:'🇻🇳',color:'#1A6B9A',bg:'#EBF5FB'},
+  'en-US':{label:'영어',    flag:'🇺🇸',color:'#27AE60',bg:'#F0FAF4'},
+  'zh-CN':{label:'중국어',  flag:'🇨🇳',color:'#C0392B',bg:'#FEF9F9'},
+  'ja-JP':{label:'일본어',  flag:'🇯🇵',color:'#7D3C98',bg:'#F8F4FD'}
 };
 
-const root = document.getElementById('root');
+var sText = params.get('text');
+var sLang = params.get('lang');
 
-/* ═══════════════════════════════════════════
-   모드 A: 단일 언어 즉시 재생
-   ?text=...&lang=...&auto=1
-═══════════════════════════════════════════ */
-const sText = params.get('text');
-const sLang = params.get('lang');
-
+/* ══════════════════════════════════
+   모드A: 단일 언어 자동재생
+══════════════════════════════════ */
 if (sText && sLang) {
-  const decoded = decodeURIComponent(sText);
-  const meta    = LANG_META[sLang] || { label:sLang, flag:'🌐', color:'#2C3E50', bg:'#F8F9FA' };
-
+  var decoded = decodeURIComponent(sText);
+  var meta = META[sLang] || {label:sLang,flag:'🌐',color:'#2C3E50',bg:'#F8F9FA'};
   document.title = meta.flag + ' ' + decoded;
 
   root.innerHTML =
-    '<div id="single">' +
-    '<div class="toast">' +
-    '<div class="ripple" id="rpl"><span></span><span></span><span></span></div>' +
+    '<div id="single"><div class="card">' +
+    '<div class="wave-wrap" id="ww"><span></span><span></span><span></span></div>' +
     '<div class="flag">' + meta.flag + '</div>' +
     '<div class="lang-name">' + meta.label + '</div>' +
     '<div class="phrase">' + decoded + '</div>' +
     '<button class="play-big" id="bigBtn" onclick="doSpeak()">🔊</button>' +
-    '<div class="status" id="sts">재생 준비 중...</div>' +
-    '<div class="close-hint" id="hint"></div>' +
+    '<div class="status" id="sts">준비 중...</div>' +
     '</div></div>';
 
-  const sts  = document.getElementById('sts');
-  const hint = document.getElementById('hint');
-  const btn  = document.getElementById('bigBtn');
-  const rpl  = document.getElementById('rpl');
-
-  let spoken = false;
+  var sts   = document.getElementById('sts');
+  var btn   = document.getElementById('bigBtn');
+  var ww    = document.getElementById('ww');
+  var spoke = false;
 
   function doSpeak() {
-    if (!synth) { sts.textContent = '이 브라우저는 TTS를 지원하지 않습니다.'; return; }
+    if (!synth) { sts.textContent = 'TTS 미지원 브라우저'; return; }
     synth.cancel();
-    const u  = new SpeechSynthesisUtterance(decoded);
+    var u = new SpeechSynthesisUtterance(decoded);
     u.lang   = sLang;
-    u.rate   = 1.1;
+    u.rate   = 1.0;
     u.pitch  = 1.0;
     u.volume = 1.0;
     btn.classList.add('playing');
-    rpl.classList.add('active');
-    sts.textContent = '재생 중...';
-    hint.textContent = '';
-    u.onstart = () => { sts.textContent = '🔊 재생 중...'; };
-    u.onend   = () => {
+    ww.classList.add('on');
+    sts.textContent = '🔊 재생 중...';
+    u.onstart = function() { spoke = true; sts.textContent = '🔊 재생 중...'; };
+    u.onend   = function() {
       btn.classList.remove('playing');
-      rpl.classList.remove('active');
-      sts.textContent = '재생 완료';
-      hint.textContent = '탭이 곧 닫힙니다...';
-      setTimeout(() => { try { window.close(); } catch(e){} }, 1200);
+      ww.classList.remove('on');
+      sts.textContent = '완료';
+      window.close();          // ← 즉시 닫기
     };
-    u.onerror = () => {
+    u.onerror = function(e) {
       btn.classList.remove('playing');
-      rpl.classList.remove('active');
-      sts.textContent = '다시 시도해 주세요';
+      ww.classList.remove('on');
+      sts.textContent = '다시 눌러주세요';
     };
     synth.speak(u);
-    spoken = true;
   }
   window.doSpeak = doSpeak;
 
-  // 자동 재생: 음성 목록 로딩 후 즉시 실행
-  function autoPlay() {
-    const voices = synth.getVoices();
+  /* ── 자동재생: 3단계 시도 ──
+     1단계: 음성 목록이 이미 있으면 즉시
+     2단계: onvoiceschanged 이벤트 대기
+     3단계: 500ms 타이머 fallback              */
+  function tryAutoPlay() {
+    if (spoke) return;
+    var voices = synth.getVoices();
     if (voices.length > 0) {
-      sts.textContent = '재생 시작...';
-      setTimeout(doSpeak, 200);
+      doSpeak();
     } else {
-      synth.onvoiceschanged = () => { if (!spoken) { setTimeout(doSpeak, 100); } };
-      setTimeout(() => { if (!spoken) doSpeak(); }, 800);
+      synth.onvoiceschanged = function() {
+        if (!spoke) doSpeak();
+      };
+      setTimeout(function() { if (!spoke) doSpeak(); }, 500);
     }
   }
-  autoPlay();
+
+  // DOM 완성 직후 즉시 시도 (클릭으로 열린 탭 = 사용자 제스처 허용)
+  if (document.readyState === 'complete') {
+    tryAutoPlay();
+  } else {
+    window.addEventListener('load', tryAutoPlay);
+    // iOS Safari 대비 추가 시도
+    setTimeout(tryAutoPlay, 100);
+  }
 
 } else {
 
-/* ═══════════════════════════════════════════
-   모드 B: 전체 문장 보기
-   ?p1=...&p2=...&date=...
-═══════════════════════════════════════════ */
-  const dl = params.get('date') || '';
-  const ALL_LANGS = [
-    { key:'kr', romanKey:null,  bcp:'ko-KR', ...LANG_META['ko-KR'] },
-    { key:'vn', romanKey:'vnr', bcp:'vi-VN', ...LANG_META['vi-VN'] },
-    { key:'en', romanKey:null,  bcp:'en-US', ...LANG_META['en-US'] },
-    { key:'cn', romanKey:'cnr', bcp:'zh-CN', ...LANG_META['zh-CN'] },
-    { key:'jp', romanKey:'jpr', bcp:'ja-JP', ...LANG_META['ja-JP'] },
+/* ══════════════════════════════════
+   모드B: 전체 문장 목록 보기
+══════════════════════════════════ */
+  var dl = params.get('date') || '';
+  var LANGS = [
+    {key:'kr',rom:null,  bcp:'ko-KR',...META['ko-KR']},
+    {key:'vn',rom:'vnr', bcp:'vi-VN',...META['vi-VN']},
+    {key:'en',rom:null,  bcp:'en-US',...META['en-US']},
+    {key:'cn',rom:'cnr', bcp:'zh-CN',...META['zh-CN']},
+    {key:'jp',rom:'jpr', bcp:'ja-JP',...META['ja-JP']}
   ];
-  const phrases = [];
-  for (let i = 1; i <= 5; i++) {
-    const raw = params.get('p'+i);
-    if (!raw) continue;
-    try { phrases.push(JSON.parse(decodeURIComponent(raw))); } catch(e) {}
+  var phrases = [];
+  for (var i = 1; i <= 5; i++) {
+    var r = params.get('p'+i);
+    if (!r) continue;
+    try { phrases.push(JSON.parse(decodeURIComponent(r))); } catch(e) {}
   }
 
   root.innerHTML =
-    '<div class="header"><h1>📢 5개국어 발음 듣기</h1><p>' + (dl || '자동 언어 발음 재생') + ' · Web Speech API</p></div>' +
-    '<div class="ctrl"><label>⏱ 속도</label><input type="range" id="spd" min="0.5" max="1.5" step="0.1" value="1.1"><span class="sv" id="sv">1.1×</span></div>' +
-    '<button class="play-all-btn" id="paBtn">▶ 전체 순서대로 재생</button>' +
-    '<div class="status-bar" id="sb">버튼을 클릭하거나 전체 재생을 눌러보세요</div>' +
+    '<div class="header"><h1>📢 5개국어 발음 듣기</h1><p>'+(dl||'자동 언어 발음 재생')+'</p></div>'+
+    '<div class="ctrl"><label>⏱ 속도</label><input type="range" id="spd" min="0.5" max="1.5" step="0.1" value="1.0"><span class="sv" id="sv">1.0×</span></div>'+
+    '<button class="pa-btn" id="paBtn">▶ 전체 순서대로 재생</button>'+
+    '<div class="sb" id="sb">버튼을 클릭하거나 전체 재생을 눌러보세요</div>'+
     '<div id="cards"></div>';
 
-  document.getElementById('spd').addEventListener('input', function(){
-    document.getElementById('sv').textContent = parseFloat(this.value).toFixed(1) + '×';
+  document.getElementById('spd').addEventListener('input',function(){
+    document.getElementById('sv').textContent=parseFloat(this.value).toFixed(1)+'×';
   });
 
-  const allRows = [];
-  const cards   = document.getElementById('cards');
-  const sb      = document.getElementById('sb');
-  let curRow    = null;
+  var allRows=[], curRow=null;
+  var cards=document.getElementById('cards'), sb=document.getElementById('sb');
 
-  function speak(text, bcp, rowEl, cb) {
+  function spk(text,bcp,rowEl,cb){
     synth.cancel();
-    if (curRow) curRow.classList.remove('playing');
-    curRow = rowEl;
-    if (rowEl) rowEl.classList.add('playing');
-    const u  = new SpeechSynthesisUtterance(text);
-    u.lang   = bcp;
-    u.rate   = parseFloat(document.getElementById('spd').value);
-    u.onend  = u.onerror = () => { if (rowEl) rowEl.classList.remove('playing'); curRow = null; if (cb) cb(); };
+    if(curRow) curRow.classList.remove('playing');
+    curRow=rowEl; if(rowEl) rowEl.classList.add('playing');
+    var u=new SpeechSynthesisUtterance(text);
+    u.lang=bcp; u.rate=parseFloat(document.getElementById('spd').value);
+    u.onend=u.onerror=function(){if(rowEl)rowEl.classList.remove('playing');curRow=null;if(cb)cb();};
     synth.speak(u);
-    sb.textContent = '재생 중: ' + text;
+    sb.textContent='재생 중: '+text;
   }
 
-  if (phrases.length === 0) {
-    cards.innerHTML = '<div style="text-align:center;color:#95A5A6;padding:30px">이메일에서 🔊 버튼을 클릭하면 발음이 재생됩니다.</div>';
+  if(phrases.length===0){
+    cards.innerHTML='<div style="text-align:center;color:#95A5A6;padding:28px">이메일에서 🔊 버튼을 클릭하세요</div>';
   } else {
-    phrases.forEach((p, idx) => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      const num = document.createElement('div');
-      num.className = 'card-num';
-      num.textContent = (idx+1) + '번 문장';
-      card.appendChild(num);
-      ALL_LANGS.forEach(lang => {
-        const text  = p[lang.key] || '';
-        const roman = lang.romanKey ? (p[lang.romanKey] || '') : '';
-        if (!text) return;
-        const row = document.createElement('div');
-        row.className = 'lang-row';
-        row.innerHTML =
-          '<div class="lg-badge" style="background:'+lang.bg+'">'+lang.flag+'</div>' +
-          '<div class="lg-info">' +
-            '<div class="lg-lbl">'+lang.label+'</div>' +
-            '<div class="lg-txt" style="color:'+lang.color+'">'+text+'</div>' +
-            (roman ? '<div class="lg-rom">'+roman+'</div>' : '') +
-          '</div>' +
+    phrases.forEach(function(p,idx){
+      var card=document.createElement('div'); card.className='pcard';
+      var num=document.createElement('div'); num.className='pcard-num';
+      num.textContent=(idx+1)+'번 문장'; card.appendChild(num);
+      LANGS.forEach(function(lang){
+        var text=p[lang.key]||'', roman=lang.rom?(p[lang.rom]||''):'';
+        if(!text) return;
+        var row=document.createElement('div'); row.className='lr';
+        row.innerHTML=
+          '<div class="lb" style="background:'+lang.bg+'">'+lang.flag+'</div>'+
+          '<div class="li"><div class="ll">'+lang.label+'</div>'+
+          '<div class="lt" style="color:'+lang.color+'">'+text+'</div>'+
+          (roman?'<div class="lrm">'+roman+'</div>':'')+'</div>'+
           '<button class="lg-btn" style="background:'+lang.bg+';color:'+lang.color+'">🔊</button>';
-        const entry = { text, bcp:lang.bcp, rowEl:row };
-        allRows.push(entry);
-        const btn = row.querySelector('.lg-btn');
-        btn.addEventListener('click', e => { e.stopPropagation(); speak(text, lang.bcp, row); });
-        row.addEventListener('click', () => btn.click());
+        allRows.push({text:text,bcp:lang.bcp,rowEl:row});
+        var b=row.querySelector('.lg-btn');
+        b.addEventListener('click',function(e){e.stopPropagation();spk(text,lang.bcp,row);});
+        row.addEventListener('click',function(){b.click();});
         card.appendChild(row);
       });
       cards.appendChild(card);
     });
   }
 
-  // 전체 재생
-  const paBtn = document.getElementById('paBtn');
-  let paActive = false, paIdx = 0;
-  function playNext() {
-    if (!paActive || paIdx >= allRows.length) {
-      paBtn.disabled = false; paBtn.textContent = '▶ 전체 순서대로 재생';
-      sb.textContent = '재생 완료!'; paActive = false; return;
+  var paBtn=document.getElementById('paBtn'), paActive=false, paIdx=0;
+  function playNext(){
+    if(!paActive||paIdx>=allRows.length){
+      paBtn.disabled=false; paBtn.textContent='▶ 전체 순서대로 재생';
+      sb.textContent='재생 완료!'; paActive=false; return;
     }
-    const { text, bcp, rowEl } = allRows[paIdx++];
-    speak(text, bcp, rowEl, () => setTimeout(playNext, 280));
+    var e=allRows[paIdx++];
+    spk(e.text,e.bcp,e.rowEl,function(){setTimeout(playNext,250);});
   }
-  paBtn.addEventListener('click', () => {
-    if (paActive) { synth.cancel(); paActive = false; paBtn.textContent = '▶ 전체 순서대로 재생'; return; }
-    paIdx = 0; paActive = true; paBtn.textContent = '⏹ 정지'; playNext();
+  paBtn.addEventListener('click',function(){
+    if(paActive){synth.cancel();paActive=false;paBtn.textContent='▶ 전체 순서대로 재생';return;}
+    paIdx=0;paActive=true;paBtn.textContent='⏹ 정지';playNext();
   });
 }
 
-window.addEventListener('beforeunload', () => synth && synth.cancel());
+window.addEventListener('beforeunload',function(){synth&&synth.cancel();});
 </script>
 </body>
 </html>
