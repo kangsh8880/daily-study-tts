@@ -6,25 +6,70 @@
 <title>🔊</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI','Noto Sans KR',Arial,sans-serif;background:#F0F4F8;min-height:100vh;padding:16px}
-#single{max-width:360px;margin:0 auto;padding-top:16px}
-.card{background:#fff;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.1);padding:24px;text-align:center}
-.flag{font-size:44px;margin-bottom:8px}
-.lang-name{font-size:10px;font-weight:bold;color:#95A5A6;letter-spacing:1px;margin-bottom:6px;text-transform:uppercase}
-.phrase{font-size:21px;font-weight:bold;color:#2C3E50;line-height:1.4;margin-bottom:20px;word-break:break-word}
-.play-big{width:64px;height:64px;background:linear-gradient(135deg,#1E8449,#27AE60);border:none;border-radius:50%;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 12px rgba(39,174,96,.35);display:inline-flex;align-items:center;justify-content:center;transition:transform .1s}
-.play-big:active{transform:scale(.93)}
-.play-big.playing{background:linear-gradient(135deg,#117A65,#1ABC9C)}
-.status{font-size:11px;color:#7F8C8D;margin-top:10px;min-height:18px}
-.src-badge{font-size:10px;color:#AED6F1;margin-top:4px}
-.wave-wrap{display:none;width:80px;height:80px;margin:0 auto 12px;position:relative}
-.wave-wrap.on{display:block}
-.wave-wrap span{position:absolute;border:2px solid #27AE60;border-radius:50%;animation:rpl 1.4s ease-out infinite;opacity:0}
-.wave-wrap span:nth-child(1){width:44px;height:44px;top:18px;left:18px;animation-delay:0s}
-.wave-wrap span:nth-child(2){width:62px;height:62px;top:9px;left:9px;animation-delay:.35s}
-.wave-wrap span:nth-child(3){width:80px;height:80px;top:0;left:0;animation-delay:.7s}
-@keyframes rpl{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1);opacity:0}}
+body{font-family:'Segoe UI','Noto Sans KR',Arial,sans-serif;background:#1A3A5C;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+
+/* 단일재생 모드 - 전체화면 스타일 */
+#single{width:100%;max-width:400px}
+.card{
+  background:#fff;
+  border-radius:20px;
+  box-shadow:0 8px 32px rgba(0,0,0,.25);
+  overflow:hidden;
+  cursor:pointer;  /* 모바일: 카드 전체 클릭 */
+}
+.card-top{
+  background:linear-gradient(135deg,#1E8449,#27AE60);
+  padding:32px 24px 24px;
+  text-align:center;
+}
+.flag{font-size:52px;margin-bottom:10px;line-height:1}
+.lang-name{font-size:11px;font-weight:bold;color:rgba(255,255,255,.8);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.phrase{font-size:24px;font-weight:bold;color:#fff;line-height:1.4;word-break:break-word}
+.card-bottom{padding:20px 24px;text-align:center;background:#fff}
+
+/* 큰 재생 버튼 */
+.tap-area{
+  width:80px;height:80px;
+  background:linear-gradient(135deg,#1E8449,#27AE60);
+  border:none;border-radius:50%;
+  color:#fff;font-size:32px;
+  cursor:pointer;
+  box-shadow:0 4px 16px rgba(39,174,96,.4);
+  display:inline-flex;align-items:center;justify-content:center;
+  margin-bottom:12px;
+  transition:transform .1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tap-area:active,.tap-area.playing{
+  transform:scale(.92);
+  background:linear-gradient(135deg,#117A65,#1ABC9C);
+}
+.tap-hint{font-size:13px;color:#7F8C8D;margin-bottom:8px;min-height:20px}
+.src-tag{font-size:10px;color:#BDC3C7;background:#F8F9FA;border-radius:10px;padding:3px 10px;display:inline-block}
+
+/* 파동 애니메이션 */
+.wave-ring{
+  position:relative;width:120px;height:120px;margin:0 auto 8px;
+  display:none;align-items:center;justify-content:center;
+}
+.wave-ring.on{display:flex}
+.wave-ring span{
+  position:absolute;border:3px solid #27AE60;border-radius:50%;
+  animation:ring 1.6s ease-out infinite;opacity:0;
+}
+.wave-ring span:nth-child(1){width:60px;height:60px;animation-delay:0s}
+.wave-ring span:nth-child(2){width:85px;height:85px;animation-delay:.4s}
+.wave-ring span:nth-child(3){width:110px;height:110px;animation-delay:.8s}
+@keyframes ring{0%{transform:scale(.3);opacity:1}100%{transform:scale(1);opacity:0}}
+
+/* 모바일 힌트 */
+.mobile-hint{
+  text-align:center;margin-top:14px;
+  font-size:12px;color:rgba(255,255,255,.6);
+}
+
 /* 전체문장 모드 */
+.full-body{background:#F0F4F8;min-height:100vh;padding:16px;}
 .header{background:linear-gradient(135deg,#1A3A5C,#2980B9);border-radius:12px;padding:16px 20px;margin-bottom:14px;color:#fff;text-align:center}
 .header h1{font-size:17px;font-weight:bold;margin-bottom:2px}
 .header p{font-size:11px;opacity:.75}
@@ -32,22 +77,21 @@ body{font-family:'Segoe UI','Noto Sans KR',Arial,sans-serif;background:#F0F4F8;m
 .ctrl label{font-size:12px;color:#555}
 .ctrl input[type=range]{width:100px;accent-color:#2980B9}
 .sv{font-size:12px;color:#2980B9;font-weight:bold;min-width:30px}
-.pa-btn{display:block;width:100%;padding:10px;margin-bottom:10px;background:linear-gradient(135deg,#1E8449,#27AE60);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:bold;cursor:pointer;box-shadow:0 3px 8px rgba(39,174,96,.28)}
-.pa-btn:disabled{opacity:.5;cursor:not-allowed}
+.pa-btn{display:block;width:100%;padding:10px;margin-bottom:10px;background:linear-gradient(135deg,#1E8449,#27AE60);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:bold;cursor:pointer}
+.pa-btn:disabled{opacity:.5}
 .sb{text-align:center;font-size:11px;color:#7F8C8D;padding:5px;min-height:18px;margin-bottom:6px}
 .pcard{background:#fff;border-radius:9px;box-shadow:0 2px 7px rgba(0,0,0,.07);margin-bottom:10px;overflow:hidden}
-.pcard-num{background:#EBF5FB;padding:5px 13px;font-size:10px;font-weight:bold;color:#1A5276;letter-spacing:.4px}
+.pcard-num{background:#EBF5FB;padding:5px 13px;font-size:10px;font-weight:bold;color:#1A5276}
 .lr{display:flex;align-items:center;gap:9px;padding:8px 13px;border-bottom:1px solid #F0F4F8;cursor:pointer;transition:background .12s}
 .lr:last-child{border-bottom:none}
-.lr:hover{background:#F8FBFE}
+.lr:hover,.lr:active{background:#F8FBFE}
 .lr.playing{background:#EBF5FB}
 .lb{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .li{flex:1;min-width:0}
 .ll{font-size:9px;color:#95A5A6;font-weight:bold;margin-bottom:1px}
 .lt{font-size:13px;font-weight:500;word-break:break-word}
 .lrm{font-size:10px;color:#7F8C8D;margin-top:1px}
-.lg-btn{width:30px;height:30px;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
-.lg-btn:active{transform:scale(.9)}
+.lg-btn{width:36px;height:36px;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;-webkit-tap-highlight-color:transparent}
 </style>
 </head>
 <body>
@@ -56,6 +100,7 @@ body{font-family:'Segoe UI','Noto Sans KR',Arial,sans-serif;background:#F0F4F8;m
 var synth  = window.speechSynthesis;
 var params = new URLSearchParams(location.search);
 var root   = document.getElementById('root');
+var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 var META = {
   'ko-KR':{label:'한국어',   flag:'🇰🇷', color:'#2C3E50', bg:'#F8F9FA'},
@@ -65,228 +110,201 @@ var META = {
   'ja-JP':{label:'일본어',   flag:'🇯🇵', color:'#7D3C98', bg:'#F8F4FD'}
 };
 
-/* ══════════════════════════════════════════════════════
-   베트남어: Google Translate TTS (북부 표준어 하노이 발음)
-   기타 언어: Web Speech API
-════════════════════════════════════════════════════════ */
 var currentAudio = null;
 
-function speakVietnamese(text, onEnd, onError) {
-  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-  // Google Translate TTS - vi = 북부 표준어(하노이) 발음
-  var url = 'https://translate.google.com/translate_tts'
-    + '?ie=UTF-8'
-    + '&q=' + encodeURIComponent(text)
-    + '&tl=vi'
-    + '&client=tw-ob'
-    + '&ttsspeed=1.0';
-  var audio = new Audio(url);
-  audio.volume = 1.0;
-  currentAudio = audio;
-  audio.onended  = function(){ currentAudio = null; if (onEnd) onEnd(); };
-  audio.onerror  = function(e){
-    currentAudio = null;
-    // Fallback: Web Speech API
-    var u = new SpeechSynthesisUtterance(text);
-    u.lang = 'vi-VN'; u.rate = 0.9; u.pitch = 1.0;
-    u.onend = onEnd; u.onerror = onError;
-    synth.speak(u);
-    if (onError) onError(e);
-  };
-  audio.play().catch(function(e){
-    currentAudio = null;
-    // play() promise rejected (autoplay policy)
-    var u = new SpeechSynthesisUtterance(text);
-    u.lang = 'vi-VN'; u.rate = 0.9;
-    u.onend = onEnd; u.onerror = onError;
-    synth.speak(u);
-  });
-}
-
-function speakWSA(text, bcp, onEnd, onError) {
-  if (!synth) { if (onError) onError(); return; }
-  synth.cancel();
-  var u = new SpeechSynthesisUtterance(text);
-  u.lang = bcp; u.rate = 1.0; u.pitch = 1.0; u.volume = 1.0;
-  // 고품질 음성 우선 선택
-  var voices = synth.getVoices();
-  var pool   = voices.filter(function(v){ return v.lang.startsWith(bcp.split('-')[0]); });
-  var best   = pool.find(function(v){ return /Natural|Premium/i.test(v.name); })
-             || pool.find(function(v){ return /Google/i.test(v.name); })
-             || pool.find(function(v){ return /Microsoft/i.test(v.name); })
-             || pool[0];
-  if (best) u.voice = best;
-  u.onend  = onEnd;
-  u.onerror = onError;
-  synth.speak(u);
-}
-
-function speakText(text, bcp, onEnd, onError) {
+/* ── 음성 재생 (Google TTS for vi / WSA for others) ── */
+function playAudio(text, bcp, onEnd, onErr) {
+  // 베트남어: Google Translate TTS
   if (bcp === 'vi-VN') {
-    speakVietnamese(text, onEnd, onError);
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    var url = 'https://translate.google.com/translate_tts?ie=UTF-8'
+      + '&q=' + encodeURIComponent(text)
+      + '&tl=vi&client=tw-ob&ttsspeed=1.0';
+    var a = new Audio(url);
+    currentAudio = a;
+    a.onended = function(){ currentAudio=null; if(onEnd) onEnd(); };
+    a.onerror = function(){
+      currentAudio = null;
+      // fallback WSA
+      wsaSpeak(text, bcp, onEnd, onErr);
+    };
+    a.play().catch(function(){
+      currentAudio = null;
+      wsaSpeak(text, bcp, onEnd, onErr);
+    });
   } else {
-    speakWSA(text, bcp, onEnd, onError);
+    wsaSpeak(text, bcp, onEnd, onErr);
   }
 }
 
-/* ══════════════════════════════════════════════
-   모드A: 단일 언어 자동재생
-══════════════════════════════════════════════ */
+function wsaSpeak(text, bcp, onEnd, onErr) {
+  if (!synth) { if(onErr) onErr(); return; }
+  synth.cancel();
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = bcp; u.rate = 1.0; u.pitch = 1.0; u.volume = 1.0;
+  var voices = synth.getVoices();
+  var pool = voices.filter(function(v){ return v.lang.startsWith(bcp.split('-')[0]); });
+  var best = pool.find(function(v){ return /Natural|Premium/i.test(v.name); })
+           || pool.find(function(v){ return /Google/i.test(v.name); })
+           || pool[0];
+  if (best) u.voice = best;
+  u.onend  = onEnd;
+  u.onerror = onErr;
+  synth.speak(u);
+}
+
+/* ══════════════════════════════════════
+   모드A: 단일 언어 재생 페이지
+   모바일: 탭하면 즉시 재생
+   데스크탑: 자동재생
+══════════════════════════════════════ */
 var sText = params.get('text');
 var sLang = params.get('lang');
 
 if (sText && sLang) {
   var decoded = decodeURIComponent(sText);
   var meta    = META[sLang] || {label:sLang, flag:'🌐', color:'#2C3E50', bg:'#F8F9FA'};
-  var isVI    = (sLang === 'vi-VN');
+  var isVI    = sLang === 'vi-VN';
   document.title = meta.flag + ' ' + decoded;
 
   root.innerHTML =
-    '<div id="single"><div class="card">' +
-    '<div class="wave-wrap" id="ww"><span></span><span></span><span></span></div>' +
+    '<div id="single">' +
+    '<div class="card" id="cardEl">' +
+    '<div class="card-top">' +
     '<div class="flag">' + meta.flag + '</div>' +
-    '<div class="lang-name">' + meta.label + '</div>' +
+    '<div class="lang-name">' + meta.label + (isVI?' · Google TTS':'') + '</div>' +
     '<div class="phrase">' + decoded + '</div>' +
-    '<button class="play-big" id="bigBtn" onclick="doSpeak()">🔊</button>' +
-    '<div class="status" id="sts">준비 중...</div>' +
-    (isVI ? '<div class="src-badge">Google TTS · 북부 표준어</div>' : '') +
-    '</div></div>';
+    '</div>' +
+    '<div class="card-bottom">' +
+    '<div class="wave-ring" id="wr"><span></span><span></span><span></span></div>' +
+    '<button class="tap-area" id="tapBtn">🔊</button>' +
+    '<div class="tap-hint" id="hint">' + (isMobile ? '탭하면 바로 재생됩니다' : '재생 준비 중...') + '</div>' +
+    (isVI ? '<span class="src-tag">북부 표준어 · Google TTS</span>' : '') +
+    '</div></div>' +
+    (isMobile ? '<div class="mobile-hint">탭하면 음성이 재생됩니다</div>' : '') +
+    '</div>';
 
-  var sts  = document.getElementById('sts');
-  var btn  = document.getElementById('bigBtn');
-  var ww   = document.getElementById('ww');
-  var spoke = false;
+  var tapBtn = document.getElementById('tapBtn');
+  var hint   = document.getElementById('hint');
+  var wr     = document.getElementById('wr');
+  var cardEl = document.getElementById('cardEl');
+  var spoke  = false;
 
-  function doSpeak() {
-    btn.classList.add('playing'); ww.classList.add('on');
-    sts.textContent = '🔊 재생 중...';
-    speakText(decoded, sLang,
-      function(){  // onEnd
-        btn.classList.remove('playing'); ww.classList.remove('on');
-        sts.textContent = '완료';
-        window.close();
+  function doPlay() {
+    if (tapBtn.classList.contains('playing')) return;
+    tapBtn.classList.add('playing');
+    wr.classList.add('on');
+    hint.textContent = '🔊 재생 중...';
+    played = true;
+
+    playAudio(decoded, sLang,
+      function(){
+        tapBtn.classList.remove('playing');
+        wr.classList.remove('on');
+        hint.textContent = '완료';
+        setTimeout(function(){ window.close(); }, 300);
       },
-      function(){  // onError
-        btn.classList.remove('playing'); ww.classList.remove('on');
-        sts.textContent = '다시 눌러주세요';
+      function(){
+        tapBtn.classList.remove('playing');
+        wr.classList.remove('on');
+        hint.textContent = '다시 탭해주세요';
       }
     );
     spoke = true;
   }
-  window.doSpeak = doSpeak;
+  window.doPlay = doPlay;
+  tapBtn.addEventListener('click', doPlay);
+  // 모바일: 카드 전체도 탭 가능
+  cardEl.addEventListener('click', function(e){
+    if (e.target !== tapBtn) doPlay();
+  });
 
-  // 자동재생
-  function tryAuto() {
-    if (spoke) return;
-    if (isVI) {
-      // Google TTS는 바로 가능
-      doSpeak();
-    } else {
-      if (synth.getVoices().length > 0) { doSpeak(); }
-      else {
-        synth.onvoiceschanged = function(){ if (!spoke) doSpeak(); };
-        setTimeout(function(){ if (!spoke) doSpeak(); }, 500);
+  // 데스크탑: 자동재생
+  if (!isMobile) {
+    function tryAuto() {
+      if (spoke) return;
+      if (isVI) {
+        setTimeout(doPlay, 100);
+      } else if (synth.getVoices().length > 0) {
+        setTimeout(doPlay, 100);
+      } else {
+        synth.onvoiceschanged = function(){ if (!spoke) doPlay(); };
+        setTimeout(function(){ if (!spoke) doPlay(); }, 600);
       }
     }
+    if (document.readyState === 'complete') tryAuto();
+    else { window.addEventListener('load', tryAuto); setTimeout(tryAuto, 80); }
+    hint.textContent = '재생 준비 중...';
   }
-
-  if (document.readyState === 'complete') { tryAuto(); }
-  else { window.addEventListener('load', tryAuto); setTimeout(tryAuto, 80); }
 
 } else {
 
-/* ══════════════════════════════════════════════
+/* ══════════════════════════════════════
    모드B: 전체 문장 목록
-══════════════════════════════════════════════ */
+══════════════════════════════════════ */
+  document.body.style.cssText = 'background:#F0F4F8;display:block;padding:0';
   var dl = params.get('date') || '';
   var LANGS = [
-    {key:'kr', rom:null,  bcp:'ko-KR', ...META['ko-KR']},
-    {key:'vn', rom:'vnr', bcp:'vi-VN', ...META['vi-VN']},
-    {key:'en', rom:null,  bcp:'en-US', ...META['en-US']},
-    {key:'cn', rom:'cnr', bcp:'zh-CN', ...META['zh-CN']},
-    {key:'jp', rom:'jpr', bcp:'ja-JP', ...META['ja-JP']}
+    {key:'kr',rom:null,  bcp:'ko-KR',...META['ko-KR']},
+    {key:'vn',rom:'vnr', bcp:'vi-VN',...META['vi-VN']},
+    {key:'en',rom:null,  bcp:'en-US',...META['en-US']},
+    {key:'cn',rom:'cnr', bcp:'zh-CN',...META['zh-CN']},
+    {key:'jp',rom:'jpr', bcp:'ja-JP',...META['ja-JP']}
   ];
-  var phrases = [];
-  for (var i=1; i<=5; i++){
+  var phrases=[];
+  for(var i=1;i<=5;i++){
     var r=params.get('p'+i);
     if(!r) continue;
-    try{ phrases.push(JSON.parse(decodeURIComponent(r))); }catch(e){}
+    try{phrases.push(JSON.parse(decodeURIComponent(r)));}catch(e){}
   }
 
-  root.innerHTML =
+  root.innerHTML=
+    '<div class="full-body">'+
     '<div class="header"><h1>📢 5개국어 발음 듣기</h1><p>'+(dl||'자동 언어 발음 재생')+'</p></div>'+
     '<div class="ctrl"><label>⏱ 속도</label><input type="range" id="spd" min="0.5" max="1.5" step="0.1" value="1.0"><span class="sv" id="sv">1.0×</span></div>'+
     '<button class="pa-btn" id="paBtn">▶ 전체 순서대로 재생</button>'+
-    '<div class="sb" id="sb">버튼을 클릭하거나 전체 재생을 눌러보세요</div>'+
-    '<div id="cards"></div>';
+    '<div class="sb" id="sb">버튼을 탭하거나 전체 재생을 누르세요</div>'+
+    '<div id="cards"></div></div>';
 
   document.getElementById('spd').addEventListener('input',function(){
     document.getElementById('sv').textContent=parseFloat(this.value).toFixed(1)+'×';
   });
 
-  var allRows=[], curRow=null;
+  var allRows=[],curRow=null;
   var cards=document.getElementById('cards'), sb=document.getElementById('sb');
 
-  function spk(text, bcp, rowEl, cb){
+  function spk(text,bcp,rowEl,cb){
     if(currentAudio){currentAudio.pause();currentAudio=null;}
-    if(synth) synth.cancel();
-    if(curRow) curRow.classList.remove('playing');
-    curRow=rowEl; if(rowEl) rowEl.classList.add('playing');
-
-    var rate = parseFloat(document.getElementById('spd').value);
-    var done = function(){
-      if(rowEl) rowEl.classList.remove('playing');
-      curRow=null; if(cb) cb();
-    };
-
-    if(bcp === 'vi-VN'){
+    if(synth)synth.cancel();
+    if(curRow)curRow.classList.remove('playing');
+    curRow=rowEl; if(rowEl)rowEl.classList.add('playing');
+    var rate=parseFloat(document.getElementById('spd').value);
+    var done=function(){if(rowEl)rowEl.classList.remove('playing');curRow=null;if(cb)cb();};
+    if(bcp==='vi-VN'){
       var url='https://translate.google.com/translate_tts?ie=UTF-8&q='+encodeURIComponent(text)+'&tl=vi&client=tw-ob&ttsspeed='+rate;
-      var audio=new Audio(url);
-      currentAudio=audio;
-      audio.onended=function(){currentAudio=null;done();};
-      audio.onerror=function(){
-        currentAudio=null;
-        var u=new SpeechSynthesisUtterance(text);
-        u.lang='vi-VN'; u.rate=rate*0.9;
-        u.onend=u.onerror=done;
-        synth.speak(u);
-      };
-      audio.play().catch(function(){
-        currentAudio=null;
-        var u=new SpeechSynthesisUtterance(text);
-        u.lang='vi-VN'; u.rate=rate*0.9;
-        u.onend=u.onerror=done;
-        synth.speak(u);
-      });
-      sb.textContent='🇻🇳 재생 중: '+text+' (Google TTS)';
+      var a=new Audio(url);currentAudio=a;
+      a.onended=function(){currentAudio=null;done();};
+      a.onerror=function(){currentAudio=null;wsaSpeak(text,bcp,done,done);};
+      a.play().catch(function(){currentAudio=null;wsaSpeak(text,bcp,done,done);});
+      sb.textContent='🇻🇳 재생 중: '+text;
     } else {
-      var u=new SpeechSynthesisUtterance(text);
-      u.lang=bcp; u.rate=rate; u.pitch=1.0;
-      var voices=synth.getVoices();
-      var pool=voices.filter(function(v){return v.lang.startsWith(bcp.split('-')[0]);});
-      var best=pool.find(function(v){return /Natural|Premium/i.test(v.name);})||
-               pool.find(function(v){return /Google/i.test(v.name);})||
-               pool[0];
-      if(best) u.voice=best;
-      u.onend=u.onerror=done;
-      synth.speak(u);
+      wsaSpeak(text,bcp,done,done);
       sb.textContent='재생 중: '+text;
     }
   }
 
   if(phrases.length===0){
-    cards.innerHTML='<div style="text-align:center;color:#95A5A6;padding:28px">이메일에서 🔊 버튼을 클릭하세요</div>';
+    cards.innerHTML='<div style="text-align:center;color:#95A5A6;padding:28px">이메일에서 🔊 버튼을 탭하세요</div>';
   } else {
     phrases.forEach(function(p,idx){
-      var card=document.createElement('div'); card.className='pcard';
-      var num=document.createElement('div'); num.className='pcard-num';
-      num.textContent=(idx+1)+'번 문장'; card.appendChild(num);
+      var card=document.createElement('div');card.className='pcard';
+      var num=document.createElement('div');num.className='pcard-num';
+      num.textContent=(idx+1)+'번 문장';card.appendChild(num);
       LANGS.forEach(function(lang){
-        var text=p[lang.key]||'', roman=lang.rom?(p[lang.rom]||''):'';
-        if(!text) return;
-        var row=document.createElement('div'); row.className='lr';
-        row.innerHTML=
-          '<div class="lb" style="background:'+lang.bg+'">'+lang.flag+'</div>'+
+        var text=p[lang.key]||'',roman=lang.rom?(p[lang.rom]||''):'';
+        if(!text)return;
+        var row=document.createElement('div');row.className='lr';
+        row.innerHTML='<div class="lb" style="background:'+lang.bg+'">'+lang.flag+'</div>'+
           '<div class="li"><div class="ll">'+lang.label+(lang.bcp==='vi-VN'?' · Google TTS':'')+'</div>'+
           '<div class="lt" style="color:'+lang.color+'">'+text+'</div>'+
           (roman?'<div class="lrm">'+roman+'</div>':'')+'</div>'+
@@ -301,11 +319,11 @@ if (sText && sLang) {
     });
   }
 
-  var paBtn=document.getElementById('paBtn'), paActive=false, paIdx=0;
+  var paBtn=document.getElementById('paBtn'),paActive=false,paIdx=0;
   function playNext(){
     if(!paActive||paIdx>=allRows.length){
-      paBtn.disabled=false; paBtn.textContent='▶ 전체 순서대로 재생';
-      sb.textContent='재생 완료!'; paActive=false; return;
+      paBtn.disabled=false;paBtn.textContent='▶ 전체 순서대로 재생';
+      sb.textContent='재생 완료!';paActive=false;return;
     }
     var e=allRows[paIdx++];
     spk(e.text,e.bcp,e.rowEl,function(){setTimeout(playNext,300);});
@@ -313,9 +331,9 @@ if (sText && sLang) {
   paBtn.addEventListener('click',function(){
     if(paActive){
       if(currentAudio){currentAudio.pause();currentAudio=null;}
-      synth&&synth.cancel(); paActive=false; paBtn.textContent='▶ 전체 순서대로 재생'; return;
+      synth&&synth.cancel();paActive=false;paBtn.textContent='▶ 전체 순서대로 재생';return;
     }
-    paIdx=0; paActive=true; paBtn.textContent='⏹ 정지'; playNext();
+    paIdx=0;paActive=true;paBtn.textContent='⏹ 정지';playNext();
   });
 }
 
