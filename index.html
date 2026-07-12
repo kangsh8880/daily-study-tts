@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📢 5개국어 발음 듣기</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'Noto Sans KR', Arial, sans-serif;
+    background: #F0F4F8;
+    min-height: 100vh;
+    padding: 20px 16px 40px;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #1A3A5C, #2980B9);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    color: white;
+    text-align: center;
+  }
+  .header h1 { font-size: 20px; font-weight: bold; margin-bottom: 4px; }
+  .header p  { font-size: 12px; opacity: .75; }
+
+  .phrase-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+
+  .phrase-card .num {
+    background: #EBF5FB;
+    padding: 8px 16px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #1A5276;
+    letter-spacing: .5px;
+  }
+
+  .lang-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #F0F4F8;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .lang-row:last-child { border-bottom: none; }
+  .lang-row:hover { background: #F8FBFE; }
+  .lang-row.playing { background: #EBF5FB; }
+
+  .lang-badge {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .lang-info { flex: 1; min-width: 0; }
+  .lang-label { font-size: 10px; color: #95A5A6; font-weight: bold; margin-bottom: 2px; }
+  .lang-text  { font-size: 14px; color: #2C3E50; font-weight: 500; word-break: break-word; }
+  .lang-roman { font-size: 11px; color: #7F8C8D; margin-top: 1px; }
+
+  .play-btn {
+    width: 34px; height: 34px;
+    border: none; border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: transform .1s;
+  }
+  .play-btn:active { transform: scale(.9); }
+
+  .play-all-wrap {
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .play-all-btn {
+    background: linear-gradient(135deg, #1E8449, #27AE60);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(39,174,96,.3);
+    transition: opacity .15s;
+  }
+  .play-all-btn:hover { opacity: .9; }
+  .play-all-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  .speed-wrap {
+    text-align: center;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .speed-wrap label { font-size: 13px; color: #555; }
+  .speed-wrap input[type=range] { width: 120px; accent-color: #2980B9; }
+  .speed-val { font-size: 13px; color: #2980B9; font-weight: bold; min-width: 30px; }
+
+  .status-bar {
+    text-align: center;
+    font-size: 12px;
+    color: #7F8C8D;
+    padding: 8px;
+    min-height: 24px;
+  }
+
+  .no-tts {
+    background: #FFF3CD;
+    border: 1px solid #FFE083;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #856404;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📢 5개국어 발음 듣기</h1>
+  <p id="date-label">자동 언어 발음 재생 · Web Speech API</p>
+</div>
+
+<div id="no-tts-msg" class="no-tts" style="display:none">
+  ⚠️ 이 브라우저는 TTS를 지원하지 않습니다. Chrome / Safari / Edge를 사용해 주세요.
+</div>
+
+<div class="speed-wrap">
+  <label>⏱ 재생 속도</label>
+  <input type="range" id="speedSlider" min="0.5" max="1.5" step="0.1" value="0.8">
+  <span class="speed-val" id="speedVal">0.8×</span>
+</div>
+
+<div class="play-all-wrap">
+  <button class="play-all-btn" id="playAllBtn">▶ 전체 순서대로 재생</button>
+</div>
+
+<div class="status-bar" id="statusBar">버튼을 클릭하거나 전체 재생을 눌러보세요</div>
+
+<div id="cards"></div>
+
+<script>
+// ─── URL 파라미터 파싱 ───────────────────────────────────────
+const params = new URLSearchParams(location.search);
+
+// 파라미터: p1, p2, p3, p4, p5 (각 문장 JSON)
+// 각 문장 JSON: {kr, vn, vnr, en, cn, cnr, jp, jpr}
+const phrases = [];
+for (let i = 1; i <= 5; i++) {
+  const raw = params.get('p' + i);
+  if (!raw) continue;
+  try { phrases.push(JSON.parse(decodeURIComponent(raw))); } catch(e) {}
+}
+
+// 날짜 라벨
+const dl = params.get('date');
+if (dl) document.getElementById('date-label').textContent = dl + ' · 5개국어 학습';
+
+// ─── TTS 지원 확인 ───────────────────────────────────────────
+const synth = window.speechSynthesis;
+if (!synth) {
+  document.getElementById('no-tts-msg').style.display = 'block';
+}
+
+// ─── 속도 슬라이더 ───────────────────────────────────────────
+const speedSlider = document.getElementById('speedSlider');
+const speedVal    = document.getElementById('speedVal');
+speedSlider.addEventListener('input', () => {
+  speedVal.textContent = parseFloat(speedSlider.value).toFixed(1) + '×';
+});
+function getRate() { return parseFloat(speedSlider.value); }
+
+// ─── 언어 정의 ───────────────────────────────────────────────
+const LANGS = [
+  { key: 'kr',  textKey: 'kr',  romanKey: null,   bcp: 'ko-KR',    label: '한국어',    badge: '🇰🇷', color: '#2C3E50',  bg: '#F8F9FA' },
+  { key: 'vn',  textKey: 'vn',  romanKey: 'vnr',  bcp: 'vi-VN',    label: '베트남어',  badge: '🇻🇳', color: '#1A6B9A',  bg: '#EBF5FB' },
+  { key: 'en',  textKey: 'en',  romanKey: null,   bcp: 'en-US',    label: '영어',      badge: '🇺🇸', color: '#27AE60',  bg: '#F0FAF4' },
+  { key: 'cn',  textKey: 'cn',  romanKey: 'cnr',  bcp: 'zh-CN',    label: '중국어',    badge: '🇨🇳', color: '#C0392B',  bg: '#FEF9F9' },
+  { key: 'jp',  textKey: 'jp',  romanKey: 'jpr',  bcp: 'ja-JP',    label: '일본어',    badge: '🇯🇵', color: '#7D3C98',  bg: '#F8F4FD' },
+];
+
+// ─── TTS 재생 함수 ───────────────────────────────────────────
+let currentRow = null;
+function speak(text, bcp, rowEl, cb) {
+  if (!synth) return;
+  synth.cancel();
+  if (currentRow) currentRow.classList.remove('playing');
+  currentRow = rowEl;
+  if (rowEl) rowEl.classList.add('playing');
+
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang  = bcp;
+  u.rate  = getRate();
+  u.onend = () => {
+    if (rowEl) rowEl.classList.remove('playing');
+    currentRow = null;
+    if (cb) cb();
+  };
+  u.onerror = () => {
+    if (rowEl) rowEl.classList.remove('playing');
+    currentRow = null;
+    if (cb) cb();
+  };
+  synth.speak(u);
+}
+
+// ─── 카드 렌더링 ─────────────────────────────────────────────
+const cardsEl  = document.getElementById('cards');
+const statusEl = document.getElementById('statusBar');
+const allRows  = []; // {text, bcp, rowEl} 순서대로
+
+if (phrases.length === 0) {
+  cardsEl.innerHTML = '<div style="text-align:center;color:#95A5A6;padding:40px">이메일의 &#128226; 발음 듣기 버튼을 클릭하면 이 페이지가 열립니다.</div>';
+} else {
+  phrases.forEach((p, idx) => {
+    const card = document.createElement('div');
+    card.className = 'phrase-card';
+
+    const numEl = document.createElement('div');
+    numEl.className = 'num';
+    numEl.textContent = (idx + 1) + '번 문장';
+    card.appendChild(numEl);
+
+    LANGS.forEach(lang => {
+      const text  = p[lang.textKey] || '';
+      const roman = lang.romanKey ? (p[lang.romanKey] || '') : '';
+      if (!text) return;
+
+      const row = document.createElement('div');
+      row.className = 'lang-row';
+
+      // 배지
+      const badge = document.createElement('div');
+      badge.className = 'lang-badge';
+      badge.textContent = lang.badge;
+      badge.style.background = lang.bg;
+
+      // 텍스트
+      const info = document.createElement('div');
+      info.className = 'lang-info';
+      info.innerHTML =
+        '<div class="lang-label">' + lang.label + '</div>' +
+        '<div class="lang-text" style="color:' + lang.color + '">' + text + '</div>' +
+        (roman ? '<div class="lang-roman">' + roman + '</div>' : '');
+
+      // 재생 버튼
+      const btn = document.createElement('button');
+      btn.className = 'play-btn';
+      btn.innerHTML  = '▶';
+      btn.style.background = lang.bg;
+      btn.style.color      = lang.color;
+      btn.title = lang.label + ' 발음 듣기';
+
+      const entry = { text, bcp: lang.bcp, rowEl: row };
+      allRows.push(entry);
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        statusEl.textContent = lang.label + ' 재생 중… ' + text;
+        speak(text, lang.bcp, row);
+      });
+      row.addEventListener('click', () => btn.click());
+
+      row.appendChild(badge);
+      row.appendChild(info);
+      row.appendChild(btn);
+      card.appendChild(row);
+    });
+
+    cardsEl.appendChild(card);
+  });
+}
+
+// ─── 전체 순서 재생 ──────────────────────────────────────────
+const playAllBtn = document.getElementById('playAllBtn');
+let playAllActive = false;
+let playAllIdx    = 0;
+
+function playNext() {
+  if (!playAllActive || playAllIdx >= allRows.length) {
+    playAllBtn.disabled = false;
+    playAllBtn.textContent = '▶ 전체 순서대로 재생';
+    statusEl.textContent = '재생 완료!';
+    playAllActive = false;
+    return;
+  }
+  const { text, bcp, rowEl } = allRows[playAllIdx++];
+  statusEl.textContent = '(' + playAllIdx + '/' + allRows.length + ') ' + text;
+  // 언어별 간격
+  speak(text, bcp, rowEl, () => setTimeout(playNext, 400));
+}
+
+playAllBtn.addEventListener('click', () => {
+  if (playAllActive) {
+    // 정지
+    synth.cancel();
+    playAllActive = false;
+    playAllBtn.disabled = false;
+    playAllBtn.textContent = '▶ 전체 순서대로 재생';
+    statusEl.textContent = '정지됨';
+    return;
+  }
+  playAllIdx    = 0;
+  playAllActive = true;
+  playAllBtn.textContent = '⏹ 정지';
+  playNext();
+});
+
+// 페이지 이탈 시 정지
+window.addEventListener('beforeunload', () => synth && synth.cancel());
+</script>
+</body>
+</html>
