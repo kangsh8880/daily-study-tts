@@ -154,7 +154,7 @@ if (sText && sLang) {
     synth.cancel();
     const u  = new SpeechSynthesisUtterance(decoded);
     u.lang   = sLang;
-    u.rate   = 1.0;
+    u.rate   = 1.1;
     u.pitch  = 1.0;
     u.volume = 1.0;
     btn.classList.add('playing');
@@ -215,7 +215,7 @@ if (sText && sLang) {
 
   root.innerHTML =
     '<div class="header"><h1>📢 5개국어 발음 듣기</h1><p>' + (dl || '자동 언어 발음 재생') + ' · Web Speech API</p></div>' +
-    '<div class="ctrl"><label>⏱ 속도</label><input type="range" id="spd" min="0.5" max="1.5" step="0.1" value="1.0"><span class="sv" id="sv">1.0×</span></div>' +
+    '<div class="ctrl"><label>⏱ 속도</label><input type="range" id="spd" min="0.5" max="1.5" step="0.1" value="1.1"><span class="sv" id="sv">1.1×</span></div>' +
     '<button class="play-all-btn" id="paBtn">▶ 전체 순서대로 재생</button>' +
     '<div class="status-bar" id="sb">버튼을 클릭하거나 전체 재생을 눌러보세요</div>' +
     '<div id="cards"></div>';
