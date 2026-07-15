@@ -61,6 +61,7 @@ var root   = document.getElementById('root');
 var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 /* ── GAS 프록시 URL ── */
+var REPEAT_MAX = 3;  /* 재생 반복 횟수 */
 var GAS_PROXY = 'https://script.google.com/macros/s/AKfycbwe5_MnyXZh9Gcx_gXiIWHN2Kyxuj0yGogvYSBc3F81fTxZnfk13mSLDAkjEeDmUNY/exec';
 
 var META = {
@@ -159,24 +160,37 @@ if (sText && sLang) {
   var hint   = document.getElementById('hint');
   var wr     = document.getElementById('wr');
   var cardEl = document.getElementById('cardEl');
-  var spoke  = false;
+  var spoke   = false;
   var playing = false;
+  var playCount = 0;
 
   function doPlay() {
     if (playing) return;
+    playCount = 0;
+    spoke = true;
+    playOnce();
+  }
+
+  function playOnce() {
     playing = true;
-    spoke   = true;
+    playCount++;
     tapBtn.classList.add('playing');
     wr.classList.add('on');
-    hint.textContent = '🔊 재생 중...';
+    hint.textContent = '🔊 재생 중... (' + playCount + '/' + REPEAT_MAX + ')';
 
     playAudio(decoded, sLang,
       function(){  /* onEnd */
-        tapBtn.classList.remove('playing');
-        wr.classList.remove('on');
-        hint.textContent = '재생 완료';
-        playing = false;
-        window.close();
+        if (playCount < REPEAT_MAX) {
+          /* 반복 재생: 500ms 간격 */
+          setTimeout(playOnce, 500);
+        } else {
+          /* 완료 → 닫기 */
+          tapBtn.classList.remove('playing');
+          wr.classList.remove('on');
+          hint.textContent = '✓ ' + REPEAT_MAX + '회 재생 완료';
+          playing = false;
+          window.close();
+        }
       },
       function(){  /* onErr */
         tapBtn.classList.remove('playing');
