@@ -1,322 +1,191 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>🔊</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI','Noto Sans KR',Arial,sans-serif;background:#1A3A5C;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
-#single{width:100%;max-width:400px}
-.card{background:#fff;border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,.25);overflow:hidden;cursor:pointer}
-.card-top{background:linear-gradient(135deg,#1E8449,#27AE60);padding:32px 24px 24px;text-align:center}
-.flag{font-size:52px;margin-bottom:10px;line-height:1}
-.lang-name{font-size:11px;font-weight:bold;color:rgba(255,255,255,.8);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
-.phrase{font-size:24px;font-weight:bold;color:#fff;line-height:1.4;word-break:break-word}
-.card-bottom{padding:20px 24px;text-align:center;background:#fff}
-.tap-area{width:80px;height:80px;background:linear-gradient(135deg,#1E8449,#27AE60);border:none;border-radius:50%;color:#fff;font-size:32px;cursor:pointer;box-shadow:0 4px 16px rgba(39,174,96,.4);display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;transition:transform .1s;-webkit-tap-highlight-color:transparent}
-.tap-area:active,.tap-area.playing{transform:scale(.92);background:linear-gradient(135deg,#117A65,#1ABC9C)}
-.tap-hint{font-size:13px;color:#7F8C8D;margin-bottom:8px;min-height:20px}
-.src-tag{font-size:10px;color:#BDC3C7;background:#F8F9FA;border-radius:10px;padding:3px 10px;display:inline-block;margin-top:4px}
-.wave-ring{position:relative;width:120px;height:120px;margin:0 auto 8px;display:none;align-items:center;justify-content:center}
-.wave-ring.on{display:flex}
-.wave-ring span{position:absolute;border:3px solid #27AE60;border-radius:50%;animation:ring 1.6s ease-out infinite;opacity:0}
-.wave-ring span:nth-child(1){width:60px;height:60px;animation-delay:0s}
-.wave-ring span:nth-child(2){width:85px;height:85px;animation-delay:.4s}
-.wave-ring span:nth-child(3){width:110px;height:110px;animation-delay:.8s}
-@keyframes ring{0%{transform:scale(.3);opacity:1}100%{transform:scale(1);opacity:0}}
-.mobile-hint{text-align:center;margin-top:14px;font-size:12px;color:rgba(255,255,255,.6)}
-/* 전체문장 모드 */
-.full-body{background:#F0F4F8;min-height:100vh;padding:16px;display:block}
-.header{background:linear-gradient(135deg,#1A3A5C,#2980B9);border-radius:12px;padding:16px 20px;margin-bottom:14px;color:#fff;text-align:center}
-.header h1{font-size:17px;font-weight:bold;margin-bottom:2px}
-.header p{font-size:11px;opacity:.75}
-.ctrl{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px}
-.ctrl label{font-size:12px;color:#555}
-.ctrl input[type=range]{width:100px;accent-color:#2980B9}
-.sv{font-size:12px;color:#2980B9;font-weight:bold;min-width:30px}
-.pa-btn{display:block;width:100%;padding:10px;margin-bottom:10px;background:linear-gradient(135deg,#1E8449,#27AE60);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:bold;cursor:pointer}
-.pa-btn:disabled{opacity:.5}
-.sb{text-align:center;font-size:11px;color:#7F8C8D;padding:5px;min-height:18px;margin-bottom:6px}
-.pcard{background:#fff;border-radius:9px;box-shadow:0 2px 7px rgba(0,0,0,.07);margin-bottom:10px;overflow:hidden}
-.pcard-num{background:#EBF5FB;padding:5px 13px;font-size:10px;font-weight:bold;color:#1A5276}
-.lr{display:flex;align-items:center;gap:9px;padding:8px 13px;border-bottom:1px solid #F0F4F8;cursor:pointer;transition:background .12s}
-.lr:last-child{border-bottom:none}
-.lr:hover,.lr:active{background:#F8FBFE}
-.lr.playing{background:#EBF5FB}
-.lb{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.li{flex:1;min-width:0}
-.ll{font-size:9px;color:#95A5A6;font-weight:bold;margin-bottom:1px}
-.lt{font-size:13px;font-weight:500;word-break:break-word}
-.lrm{font-size:10px;color:#7F8C8D;margin-top:1px}
-.lg-btn{width:36px;height:36px;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;-webkit-tap-highlight-color:transparent}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+  <title>TTS</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#1a1a2e;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Malgun Gothic',Arial,sans-serif;}
+    .card{background:#16213e;border-radius:18px;padding:28px 24px;text-align:center;max-width:340px;width:92%;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+    .lang-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:14px;}
+    .text-box{font-size:20px;color:#e8e8e8;margin:10px 0 6px;line-height:1.5;word-break:break-all;min-height:40px;}
+    .pron{font-size:13px;color:#8899AA;margin-bottom:16px;}
+    .btn{background:#0f3460;color:#fff;border:none;border-radius:12px;padding:13px 32px;font-size:15px;cursor:pointer;width:100%;transition:background 0.2s;}
+    .btn:active{background:#1a5276;}
+    .status{font-size:12px;margin-top:12px;height:18px;}
+    .ok{color:#4CAF50;} .err{color:#EF5350;} .ing{color:#FFA726;}
+  </style>
 </head>
 <body>
-<div id="root"></div>
+<div class="card">
+  <div class="lang-badge" id="badge"></div>
+  <div class="text-box" id="textDisplay"></div>
+  <div class="pron" id="pronDisplay"></div>
+  <button class="btn" id="playBtn" onclick="playNow()">&#9654; 발음 듣기</button>
+  <div class="status" id="status"></div>
+</div>
 <script>
-var synth  = window.speechSynthesis;
-var params = new URLSearchParams(location.search);
-var root   = document.getElementById('root');
-var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+var p = new URLSearchParams(location.search);
+var rawText = p.get('text') || '';
+var lang    = p.get('lang') || 'ko';
+var auto    = p.get('auto') === '1';
 
-/* ── GAS 프록시 URL ── */
-var REPEAT_MAX = 3;  /* 재생 반복 횟수 */
-var GAS_PROXY = 'https://script.google.com/macros/s/AKfycbwe5_MnyXZh9Gcx_gXiIWHN2Kyxuj0yGogvYSBc3F81fTxZnfk13mSLDAkjEeDmUNY/exec';
+var decoded = '';
+try { decoded = decodeURIComponent(rawText); } catch(e){ decoded = rawText; }
 
 var META = {
-  'ko-KR':{label:'한국어',   flag:'🇰🇷',color:'#2C3E50',bg:'#F8F9FA'},
-  'vi-VN':{label:'베트남어', flag:'🇻🇳',color:'#1A6B9A',bg:'#EBF5FB'},
-  'en-US':{label:'영어',     flag:'🇺🇸',color:'#27AE60',bg:'#F0FAF4'},
-  'zh-CN':{label:'중국어',   flag:'🇨🇳',color:'#C0392B',bg:'#FEF9F9'},
-  'ja-JP':{label:'일본어',   flag:'🇯🇵',color:'#7D3C98',bg:'#F8F4FD'}
+  ko: {name:'한국어', full:'ko-KR', color:'#3F51B5', bg:'#E8EAF6'},
+  vi: {name:'베트남어', full:'vi-VN', color:'#4CAF50', bg:'#E8F5E9'},
+  en: {name:'영어',    full:'en-US', color:'#FF9800', bg:'#FFF3E0'},
+  zh: {name:'중국어',  full:'zh-CN', color:'#F44336', bg:'#FFEBEE'},
+  ja: {name:'일본어',  full:'ja-JP', color:'#9C27B0', bg:'#F3E5F5'}
 };
+var m = META[lang] || META.ko;
 
-var currentAudio = null;
+var badge = document.getElementById('badge');
+badge.textContent = m.name;
+badge.style.background = m.bg;
+badge.style.color = m.color;
 
-/* ════════════════════════════════════════════
-   베트남어: GAS 프록시 → base64 → blob → 재생
-   (CORS 완전 우회, 북부 표준어 Google TTS)
-════════════════════════════════════════════ */
-function playViGAS(text, onEnd, onErr) {
-  var url = GAS_PROXY + '?t=' + encodeURIComponent(text) + '&l=vi';
-  fetch(url)
-    .then(function(r){ return r.text(); })
-    .then(function(b64){
-      if (!b64 || b64.indexOf('ERR') === 0) { throw new Error(b64); }
-      /* base64 → Uint8Array → Blob → ObjectURL */
-      var bin = atob(b64);
-      var bytes = new Uint8Array(bin.length);
-      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      var blob = new Blob([bytes], {type:'audio/mpeg'});
-      var objUrl = URL.createObjectURL(blob);
-      if (currentAudio) { currentAudio.pause(); URL.revokeObjectURL(currentAudio.src); }
-      var a = new Audio(objUrl);
-      currentAudio = a;
-      a.onended = function(){ URL.revokeObjectURL(objUrl); currentAudio=null; if(onEnd)onEnd(); };
-      a.onerror = function(){ URL.revokeObjectURL(objUrl); currentAudio=null; if(onErr)onErr(); };
-      return a.play();
-    })
-    .catch(function(e){
-      /* fallback: Web Speech API */
-      wsaSpeak(text, 'vi-VN', onEnd, onErr);
-    });
+document.getElementById('textDisplay').textContent = decoded;
+
+function setStatus(msg, cls){
+  var el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + (cls||'');
 }
 
-function wsaSpeak(text, bcp, onEnd, onErr) {
-  if (!synth) { if(onErr)onErr(); return; }
-  synth.cancel();
-  var u = new SpeechSynthesisUtterance(text);
-  u.lang = bcp; u.rate = 1.0; u.pitch = 1.0; u.volume = 1.0;
-  var voices = synth.getVoices();
-  var pool = voices.filter(function(v){ return v.lang.startsWith(bcp.split('-')[0]); });
-  var best = pool.find(function(v){ return /Natural|Premium/i.test(v.name); })
-           || pool.find(function(v){ return /Google/i.test(v.name); })
-           || pool[0];
-  if (best) u.voice = best;
-  u.onend = onEnd; u.onerror = onErr;
-  synth.speak(u);
+function getBestVoice(fullLang, shortLang) {
+  var voices = speechSynthesis.getVoices();
+  var best = null;
+
+  // 중국어: zh-CN 우선, zh-TW 제외
+  if (shortLang === 'zh') {
+    // 1순위: Google 普通话
+    for(var i=0;i<voices.length;i++){
+      var v=voices[i];
+      if((v.lang==='zh-CN'||v.lang==='zh') && v.name.indexOf('Google')>=0) return v;
+    }
+    // 2순위: 로컬 zh-CN
+    for(var i=0;i<voices.length;i++){
+      var v=voices[i];
+      if(v.lang==='zh-CN') return v;
+    }
+    // 3순위: zh 포함 (TW 제외)
+    for(var i=0;i<voices.length;i++){
+      var v=voices[i];
+      if(v.lang.indexOf('zh')>=0 && v.lang.indexOf('TW')<0) return v;
+    }
+    return null;
+  }
+
+  // 일본어
+  if (shortLang === 'ja') {
+    for(var i=0;i<voices.length;i++){
+      var v=voices[i];
+      if((v.lang==='ja-JP'||v.lang==='ja') && v.name.indexOf('Google')>=0) return v;
+    }
+    for(var i=0;i<voices.length;i++){
+      var v=voices[i];
+      if(v.lang==='ja-JP'||v.lang==='ja') return v;
+    }
+    return null;
+  }
+
+  // 베트남어
+  if (shortLang === 'vi') {
+    for(var i=0;i<voices.length;i++){
+      var v=voices[i];
+      if((v.lang==='vi-VN'||v.lang==='vi') && v.name.indexOf('Google')>=0) return v;
+    }
+    for(var i=0;i<voices.length;i++){
+      var v=voices[i];
+      if(v.lang==='vi-VN'||v.lang==='vi') return v;
+    }
+    return null;
+  }
+
+  // 한국어/영어 기본
+  for(var i=0;i<voices.length;i++){
+    var v=voices[i];
+    if(v.lang===fullLang && v.name.indexOf('Google')>=0) return v;
+  }
+  for(var i=0;i<voices.length;i++){
+    var v=voices[i];
+    if(v.lang===fullLang) return v;
+  }
+  for(var i=0;i<voices.length;i++){
+    var v=voices[i];
+    if(v.lang.startsWith(shortLang)) return v;
+  }
+  return null;
 }
 
-function playAudio(text, bcp, onEnd, onErr) {
-  if (bcp === 'vi-VN') {
-    playViGAS(text, onEnd, onErr);
+var playCount = 0;
+var MAX_PLAY = 3;
+
+function speak() {
+  if (playCount >= MAX_PLAY) {
+    setStatus('재생 완료 (' + MAX_PLAY + '회)', 'ok');
+    if (auto && !/Mobi|Android/i.test(navigator.userAgent)) {
+      setTimeout(function(){ window.close(); }, 600);
+    }
+    return;
+  }
+  playCount++;
+  setStatus((playCount) + ' / ' + MAX_PLAY + ' 재생 중...', 'ing');
+
+  var utter = new SpeechSynthesisUtterance(decoded);
+  utter.lang = m.full;
+  utter.rate = (lang === 'zh' || lang === 'ja') ? 0.85 : 0.9;
+  utter.pitch = 1.0;
+
+  var voice = getBestVoice(m.full, lang);
+  if (voice) {
+    utter.voice = voice;
+    document.getElementById('pronDisplay').textContent = voice.name;
   } else {
-    wsaSpeak(text, bcp, onEnd, onErr);
+    document.getElementById('pronDisplay').textContent = m.full + ' (기본 음성)';
   }
+
+  utter.onend = function(){ speak(); };
+  utter.onerror = function(e){
+    setStatus('오류: ' + e.error, 'err');
+    if (e.error !== 'interrupted') speak();
+  };
+
+  speechSynthesis.speak(utter);
 }
 
-/* ════════════════════════════════════════════
-   모드A: 단일 언어 재생
-   데스크탑: 자동재생 / 모바일: 탭 즉시재생
-════════════════════════════════════════════ */
-var sText = params.get('text');
-var sLang = params.get('lang');
-
-if (sText && sLang) {
-  var decoded = decodeURIComponent(sText);
-  var meta    = META[sLang] || {label:sLang, flag:'🌐', color:'#2C3E50', bg:'#F8F9FA'};
-  var isVI    = sLang === 'vi-VN';
-  document.title = meta.flag + ' ' + decoded;
-
-  root.innerHTML =
-    '<div id="single">' +
-    '<div class="card" id="cardEl">' +
-    '<div class="card-top">' +
-    '<div class="flag">' + meta.flag + '</div>' +
-    '<div class="lang-name">' + meta.label + (isVI ? ' · Google TTS' : '') + '</div>' +
-    '<div class="phrase">' + decoded + '</div>' +
-    '</div>' +
-    '<div class="card-bottom">' +
-    '<div class="wave-ring" id="wr"><span></span><span></span><span></span></div>' +
-    '<button class="tap-area" id="tapBtn">🔊</button>' +
-    '<div class="tap-hint" id="hint">' + (isMobile ? '탭하면 바로 재생됩니다' : '자동 재생 중...') + '</div>' +
-    (isVI ? '<span class="src-tag">북부 표준어 · Google TTS · GAS Proxy</span>' : '') +
-    '</div></div>' +
-    (isMobile ? '<div class="mobile-hint">화면을 탭하면 음성이 재생됩니다 🔊</div>' : '') +
-    '</div>';
-
-  var tapBtn = document.getElementById('tapBtn');
-  var hint   = document.getElementById('hint');
-  var wr     = document.getElementById('wr');
-  var cardEl = document.getElementById('cardEl');
-  var spoke   = false;
-  var playing = false;
-  var playCount = 0;
-
-  function doPlay() {
-    if (playing) return;
-    playCount = 0;
-    spoke = true;
-    playOnce();
-  }
-
-  function playOnce() {
-    playing = true;
-    playCount++;
-    tapBtn.classList.add('playing');
-    wr.classList.add('on');
-    hint.textContent = '🔊 재생 중... (' + playCount + '/' + REPEAT_MAX + ')';
-
-    playAudio(decoded, sLang,
-      function(){  /* onEnd */
-        if (playCount < REPEAT_MAX) {
-          /* 반복 재생: 500ms 간격 */
-          setTimeout(playOnce, 500);
-        } else {
-          /* 완료 → 닫기 */
-          tapBtn.classList.remove('playing');
-          wr.classList.remove('on');
-          hint.textContent = '✓ ' + REPEAT_MAX + '회 재생 완료';
-          playing = false;
-          window.close();
-        }
-      },
-      function(){  /* onErr */
-        tapBtn.classList.remove('playing');
-        wr.classList.remove('on');
-        hint.textContent = '다시 탭해주세요';
-        playing = false;
-      }
-    );
-  }
-  window.doPlay = doPlay;
-
-  tapBtn.addEventListener('click', doPlay);
-  cardEl.addEventListener('click', function(e){ if(e.target !== tapBtn) doPlay(); });
-
-  /* 데스크탑 자동재생 */
-  if (!isMobile) {
-    function tryAuto() {
-      if (spoke) return;
-      if (isVI) {
-        doPlay();  /* GAS프록시는 fetch이므로 사용자제스처 불필요 */
-      } else {
-        var v = synth.getVoices();
-        if (v.length > 0) { doPlay(); }
-        else {
-          synth.onvoiceschanged = function(){ if(!spoke) doPlay(); };
-          setTimeout(function(){ if(!spoke) doPlay(); }, 600);
-        }
-      }
-    }
-    if (document.readyState === 'complete') { tryAuto(); }
-    else { window.addEventListener('load', tryAuto); setTimeout(tryAuto, 80); }
-  }
-
-} else {
-
-/* ════════════════════════════════════════════
-   모드B: 전체 문장 목록
-════════════════════════════════════════════ */
-  document.body.style.cssText = 'background:#F0F4F8;display:block;padding:0';
-  var dl = params.get('date') || '';
-  var LANGS = [
-    {key:'kr',rom:null, bcp:'ko-KR',...META['ko-KR']},
-    {key:'vn',rom:'vnr',bcp:'vi-VN',...META['vi-VN']},
-    {key:'en',rom:null, bcp:'en-US',...META['en-US']},
-    {key:'cn',rom:'cnr',bcp:'zh-CN',...META['zh-CN']},
-    {key:'jp',rom:'jpr',bcp:'ja-JP',...META['ja-JP']}
-  ];
-  var phrases=[];
-  for(var i=1;i<=5;i++){
-    var r=params.get('p'+i);
-    if(!r) continue;
-    try{phrases.push(JSON.parse(decodeURIComponent(r)));}catch(e){}
-  }
-
-  root.innerHTML=
-    '<div class="full-body">'+
-    '<div class="header"><h1>📢 5개국어 발음 듣기</h1><p>'+(dl||'자동 언어 발음 재생')+'</p></div>'+
-    '<div class="ctrl"><label>⏱ 속도</label><input type="range" id="spd" min="0.5" max="1.5" step="0.1" value="1.0"><span class="sv" id="sv">1.0×</span></div>'+
-    '<button class="pa-btn" id="paBtn">▶ 전체 순서대로 재생</button>'+
-    '<div class="sb" id="sb">버튼을 탭하거나 전체 재생을 누르세요</div>'+
-    '<div id="cards"></div></div>';
-
-  document.getElementById('spd').addEventListener('input',function(){
-    document.getElementById('sv').textContent=parseFloat(this.value).toFixed(1)+'×';
-  });
-
-  var allRows=[],curRow=null;
-  var cards=document.getElementById('cards'),sb=document.getElementById('sb');
-
-  function spk(text,bcp,rowEl,cb){
-    if(currentAudio){currentAudio.pause();try{URL.revokeObjectURL(currentAudio.src);}catch(e){}currentAudio=null;}
-    if(synth)synth.cancel();
-    if(curRow)curRow.classList.remove('playing');
-    curRow=rowEl; if(rowEl)rowEl.classList.add('playing');
-    var done=function(){if(rowEl)rowEl.classList.remove('playing');curRow=null;if(cb)cb();};
-    sb.textContent='재생 중: '+text;
-    playAudio(text,bcp,done,done);
-  }
-
-  if(phrases.length===0){
-    cards.innerHTML='<div style="text-align:center;color:#95A5A6;padding:28px">이메일에서 🔊 버튼을 탭하세요</div>';
+function playNow() {
+  speechSynthesis.cancel();
+  playCount = 0;
+  var voices = speechSynthesis.getVoices();
+  if (voices.length === 0) {
+    setStatus('음성 로딩 중...', 'ing');
+    speechSynthesis.onvoiceschanged = function(){ speechSynthesis.onvoiceschanged=null; speak(); };
   } else {
-    phrases.forEach(function(p,idx){
-      var card=document.createElement('div');card.className='pcard';
-      var num=document.createElement('div');num.className='pcard-num';
-      num.textContent=(idx+1)+'번 문장';card.appendChild(num);
-      LANGS.forEach(function(lang){
-        var text=p[lang.key]||'',roman=lang.rom?(p[lang.rom]||''):'';
-        if(!text)return;
-        var row=document.createElement('div');row.className='lr';
-        row.innerHTML='<div class="lb" style="background:'+lang.bg+'">'+lang.flag+'</div>'+
-          '<div class="li"><div class="ll">'+lang.label+(lang.bcp==='vi-VN'?' · Google TTS':'')+'</div>'+
-          '<div class="lt" style="color:'+lang.color+'">'+text+'</div>'+
-          (roman?'<div class="lrm">'+roman+'</div>':'')+'</div>'+
-          '<button class="lg-btn" style="background:'+lang.bg+';color:'+lang.color+'">🔊</button>';
-        allRows.push({text:text,bcp:lang.bcp,rowEl:row});
-        var b=row.querySelector('.lg-btn');
-        b.addEventListener('click',function(e){e.stopPropagation();spk(text,lang.bcp,row);});
-        row.addEventListener('click',function(){b.click();});
-        card.appendChild(row);
-      });
-      cards.appendChild(card);
-    });
+    speak();
   }
-
-  var paBtn=document.getElementById('paBtn'),paActive=false,paIdx=0;
-  function playNext(){
-    if(!paActive||paIdx>=allRows.length){
-      paBtn.disabled=false;paBtn.textContent='▶ 전체 순서대로 재생';
-      sb.textContent='재생 완료!';paActive=false;return;
-    }
-    var e=allRows[paIdx++];
-    spk(e.text,e.bcp,e.rowEl,function(){setTimeout(playNext,300);});
-  }
-  paBtn.addEventListener('click',function(){
-    if(paActive){
-      if(currentAudio){currentAudio.pause();currentAudio=null;}
-      synth&&synth.cancel();paActive=false;paBtn.textContent='▶ 전체 순서대로 재생';return;
-    }
-    paIdx=0;paActive=true;paBtn.textContent='⏹ 정지';playNext();
-  });
 }
 
-window.addEventListener('beforeunload',function(){
-  if(currentAudio){currentAudio.pause();try{URL.revokeObjectURL(currentAudio.src);}catch(e){}currentAudio=null;}
-  synth&&synth.cancel();
+// 자동 재생
+window.addEventListener('load', function(){
+  // 모바일: 탭 1회 탭으로 재생
+  if (/Mobi|Android/i.test(navigator.userAgent)) {
+    setStatus('화면을 탭하면 재생됩니다', 'ing');
+    document.body.addEventListener('click', function(){ playNow(); }, {once:true});
+    return;
+  }
+  // PC: 자동 재생
+  if (auto) {
+    setTimeout(function(){
+      var voices = speechSynthesis.getVoices();
+      if (voices.length > 0) { playNow(); }
+      else { speechSynthesis.onvoiceschanged = function(){ speechSynthesis.onvoiceschanged=null; playNow(); }; }
+    }, 400);
+  }
 });
 </script>
 </body>
