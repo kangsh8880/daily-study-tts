@@ -10,7 +10,7 @@
     .card{background:#16213e;border-radius:18px;padding:28px 24px;text-align:center;max-width:340px;width:92%;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
     .lang-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:14px;}
     .text-box{font-size:20px;color:#e8e8e8;margin:10px 0 6px;line-height:1.5;word-break:break-all;min-height:40px;}
-    .pron{font-size:13px;color:#8899AA;margin-bottom:16px;}
+    .pron{font-size:12px;color:#8899AA;margin-bottom:16px;min-height:16px;}
     .btn{background:#0f3460;color:#fff;border:none;border-radius:12px;padding:13px 32px;font-size:15px;cursor:pointer;width:100%;transition:background 0.2s;}
     .btn:active{background:#1a5276;}
     .status{font-size:12px;margin-top:12px;height:18px;}
@@ -27,19 +27,26 @@
 </div>
 <script>
 var p = new URLSearchParams(location.search);
-var rawText = p.get('text') || '';
-var lang    = p.get('lang') || 'ko';
-var auto    = p.get('auto') === '1';
+var rawText  = p.get('text')  || '';
+var lang     = p.get('lang')  || 'ko';
+var auto     = p.get('auto')  === '1';
+var proxyUrl = p.get('proxy') ? decodeURIComponent(p.get('proxy')) : '';
 
 var decoded = '';
 try { decoded = decodeURIComponent(rawText); } catch(e){ decoded = rawText; }
 
+// 괄호() 안 텍스트 제거 후 TTS 읽기
+function cleanText(t) {
+  return t.replace(/\([^)]*\)/g, '').replace(/\s{2,}/g, ' ').trim();
+}
+var cleaned = cleanText(decoded);
+
 var META = {
-  ko: {name:'한국어', full:'ko-KR', color:'#3F51B5', bg:'#E8EAF6'},
-  vi: {name:'베트남어', full:'vi-VN', color:'#4CAF50', bg:'#E8F5E9'},
-  en: {name:'영어',    full:'en-US', color:'#FF9800', bg:'#FFF3E0'},
-  zh: {name:'중국어',  full:'zh-CN', color:'#F44336', bg:'#FFEBEE'},
-  ja: {name:'일본어',  full:'ja-JP', color:'#9C27B0', bg:'#F3E5F5'}
+  ko:{name:'한국어', full:'ko-KR', color:'#3F51B5', bg:'#E8EAF6'},
+  vi:{name:'베트남어', full:'vi-VN', color:'#4CAF50', bg:'#E8F5E9'},
+  en:{name:'영어',    full:'en-US', color:'#FF9800', bg:'#FFF3E0'},
+  zh:{name:'중국어',  full:'zh-CN', color:'#F44336', bg:'#FFEBEE'},
+  ja:{name:'일본어',  full:'ja-JP', color:'#9C27B0', bg:'#F3E5F5'}
 };
 var m = META[lang] || META.ko;
 
@@ -47,7 +54,6 @@ var badge = document.getElementById('badge');
 badge.textContent = m.name;
 badge.style.background = m.bg;
 badge.style.color = m.color;
-
 document.getElementById('textDisplay').textContent = decoded;
 
 function setStatus(msg, cls){
@@ -55,135 +61,128 @@ function setStatus(msg, cls){
   el.textContent = msg;
   el.className = 'status ' + (cls||'');
 }
+function setPron(msg){ document.getElementById('pronDisplay').textContent = msg; }
 
+// ── Web Speech API (한/영/중/일 및 베트남어 폴백) ──
 function getBestVoice(fullLang, shortLang) {
   var voices = speechSynthesis.getVoices();
-  var best = null;
-
-  // 중국어: zh-CN 우선, zh-TW 제외
   if (shortLang === 'zh') {
-    // 1순위: Google 普通话
-    for(var i=0;i<voices.length;i++){
-      var v=voices[i];
-      if((v.lang==='zh-CN'||v.lang==='zh') && v.name.indexOf('Google')>=0) return v;
-    }
-    // 2순위: 로컬 zh-CN
-    for(var i=0;i<voices.length;i++){
-      var v=voices[i];
-      if(v.lang==='zh-CN') return v;
-    }
-    // 3순위: zh 포함 (TW 제외)
-    for(var i=0;i<voices.length;i++){
-      var v=voices[i];
-      if(v.lang.indexOf('zh')>=0 && v.lang.indexOf('TW')<0) return v;
-    }
+    for(var i=0;i<voices.length;i++) if((voices[i].lang==='zh-CN'||voices[i].lang==='zh')&&voices[i].name.indexOf('Google')>=0) return voices[i];
+    for(var i=0;i<voices.length;i++) if(voices[i].lang==='zh-CN') return voices[i];
+    for(var i=0;i<voices.length;i++) if(voices[i].lang.indexOf('zh')>=0&&voices[i].lang.indexOf('TW')<0) return voices[i];
     return null;
   }
-
-  // 일본어
   if (shortLang === 'ja') {
-    for(var i=0;i<voices.length;i++){
-      var v=voices[i];
-      if((v.lang==='ja-JP'||v.lang==='ja') && v.name.indexOf('Google')>=0) return v;
-    }
-    for(var i=0;i<voices.length;i++){
-      var v=voices[i];
-      if(v.lang==='ja-JP'||v.lang==='ja') return v;
-    }
+    for(var i=0;i<voices.length;i++) if((voices[i].lang==='ja-JP'||voices[i].lang==='ja')&&voices[i].name.indexOf('Google')>=0) return voices[i];
+    for(var i=0;i<voices.length;i++) if(voices[i].lang==='ja-JP'||voices[i].lang==='ja') return voices[i];
     return null;
   }
-
-  // 베트남어
-  if (shortLang === 'vi') {
-    for(var i=0;i<voices.length;i++){
-      var v=voices[i];
-      if((v.lang==='vi-VN'||v.lang==='vi') && v.name.indexOf('Google')>=0) return v;
-    }
-    for(var i=0;i<voices.length;i++){
-      var v=voices[i];
-      if(v.lang==='vi-VN'||v.lang==='vi') return v;
-    }
-    return null;
-  }
-
-  // 한국어/영어 기본
-  for(var i=0;i<voices.length;i++){
-    var v=voices[i];
-    if(v.lang===fullLang && v.name.indexOf('Google')>=0) return v;
-  }
-  for(var i=0;i<voices.length;i++){
-    var v=voices[i];
-    if(v.lang===fullLang) return v;
-  }
-  for(var i=0;i<voices.length;i++){
-    var v=voices[i];
-    if(v.lang.startsWith(shortLang)) return v;
-  }
+  for(var i=0;i<voices.length;i++) if(voices[i].lang===fullLang&&voices[i].name.indexOf('Google')>=0) return voices[i];
+  for(var i=0;i<voices.length;i++) if(voices[i].lang===fullLang) return voices[i];
+  for(var i=0;i<voices.length;i++) if(voices[i].lang.startsWith(shortLang)) return voices[i];
   return null;
 }
 
-var playCount = 0;
-var MAX_PLAY = 3;
+var repeatCount = 0;
+var MAX_REPEAT = 3;
 
-function speak() {
-  if (playCount >= MAX_PLAY) {
-    setStatus('재생 완료 (' + MAX_PLAY + '회)', 'ok');
-    if (auto && !/Mobi|Android/i.test(navigator.userAgent)) {
-      setTimeout(function(){ window.close(); }, 600);
-    }
-    return;
-  }
-  playCount++;
-  setStatus((playCount) + ' / ' + MAX_PLAY + ' 재생 중...', 'ing');
+function speakWeb(onDone) {
+  if (repeatCount >= MAX_REPEAT) { if(onDone) onDone(); return; }
+  repeatCount++;
+  setStatus(repeatCount + ' / ' + MAX_REPEAT + ' 재생 중...', 'ing');
 
-  var cleaned = decoded.replace(/\([^)]*\)/g, "").replace(/\s{2,}/g, " ").trim();
   var utter = new SpeechSynthesisUtterance(cleaned);
-  utter.lang = m.full;
-  utter.rate = (lang === 'zh' || lang === 'ja') ? 0.85 : 0.9;
+  utter.lang  = m.full;
+  utter.rate  = (lang==='zh'||lang==='ja') ? 0.85 : 0.9;
   utter.pitch = 1.0;
 
   var voice = getBestVoice(m.full, lang);
-  if (voice) {
-    utter.voice = voice;
-    document.getElementById('pronDisplay').textContent = voice.name;
-  } else {
-    document.getElementById('pronDisplay').textContent = m.full + ' (기본 음성)';
-  }
+  if (voice) { utter.voice = voice; setPron(voice.name); }
+  else { setPron(m.full + ' (기본 음성)'); }
 
-  utter.onend = function(){ speak(); };
-  utter.onerror = function(e){
-    setStatus('오류: ' + e.error, 'err');
-    if (e.error !== 'interrupted') speak();
-  };
-
+  utter.onend  = function(){ speakWeb(onDone); };
+  utter.onerror = function(e){ if(e.error!=='interrupted') speakWeb(onDone); };
   speechSynthesis.speak(utter);
+}
+
+// ── 베트남어 GAS 프록시 (고품질 북부표준어) ──
+function speakViProxy(proxyBase, onDone) {
+  var url = proxyBase + '?text=' + encodeURIComponent(cleaned) + '&lang=vi';
+  setStatus('고품질 음성 로딩 중...', 'ing');
+  setPron('Google TTS (북부표준어)');
+
+  fetch(url)
+    .then(function(res){
+      if(!res.ok) throw new Error('proxy_error');
+      return res.text();
+    })
+    .then(function(base64){
+      if(!base64 || base64 === 'error') throw new Error('empty');
+      var binary = atob(base64);
+      var bytes = new Uint8Array(binary.length);
+      for(var i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
+      var blob = new Blob([bytes], {type:'audio/mpeg'});
+      var blobUrl = URL.createObjectURL(blob);
+
+      var count = 0;
+      function playOnce() {
+        if(count >= MAX_REPEAT){ URL.revokeObjectURL(blobUrl); if(onDone) onDone(); return; }
+        count++;
+        setStatus(count + ' / ' + MAX_REPEAT + ' 재생 중...', 'ing');
+        var audio = new Audio(blobUrl);
+        audio.onended = function(){ playOnce(); };
+        audio.onerror = function(){ URL.revokeObjectURL(blobUrl); fallbackWeb(onDone); };
+        audio.play().catch(function(){ URL.revokeObjectURL(blobUrl); fallbackWeb(onDone); });
+      }
+      playOnce();
+    })
+    .catch(function(e){
+      setPron('프록시 실패 → Web Speech API 전환');
+      fallbackWeb(onDone);
+    });
+}
+
+function fallbackWeb(onDone) {
+  repeatCount = 0;
+  speakWeb(onDone);
+}
+
+function onAllDone() {
+  setStatus('재생 완료 (' + MAX_REPEAT + '회)', 'ok');
+  if(auto && !/Mobi|Android/i.test(navigator.userAgent)) {
+    setTimeout(function(){ window.close(); }, 600);
+  }
 }
 
 function playNow() {
   speechSynthesis.cancel();
-  playCount = 0;
-  var voices = speechSynthesis.getVoices();
-  if (voices.length === 0) {
-    setStatus('음성 로딩 중...', 'ing');
-    speechSynthesis.onvoiceschanged = function(){ speechSynthesis.onvoiceschanged=null; speak(); };
+  repeatCount = 0;
+
+  if (lang === 'vi' && proxyUrl) {
+    // 베트남어 + 프록시 URL → GAS 고품질 TTS
+    speakViProxy(proxyUrl, onAllDone);
   } else {
-    speak();
+    // 그 외 (베트남어 프록시 없을 때 포함) → Web Speech API
+    var voices = speechSynthesis.getVoices();
+    if(voices.length === 0) {
+      setStatus('음성 로딩 중...', 'ing');
+      speechSynthesis.onvoiceschanged = function(){ speechSynthesis.onvoiceschanged=null; speakWeb(onAllDone); };
+    } else {
+      speakWeb(onAllDone);
+    }
   }
 }
 
-// 자동 재생
 window.addEventListener('load', function(){
-  // 모바일: 탭 1회 탭으로 재생
-  if (/Mobi|Android/i.test(navigator.userAgent)) {
+  if(/Mobi|Android/i.test(navigator.userAgent)){
     setStatus('화면을 탭하면 재생됩니다', 'ing');
     document.body.addEventListener('click', function(){ playNow(); }, {once:true});
     return;
   }
-  // PC: 자동 재생
-  if (auto) {
+  if(auto){
     setTimeout(function(){
-      var voices = speechSynthesis.getVoices();
-      if (voices.length > 0) { playNow(); }
+      var v = speechSynthesis.getVoices();
+      if(v.length>0){ playNow(); }
       else { speechSynthesis.onvoiceschanged = function(){ speechSynthesis.onvoiceschanged=null; playNow(); }; }
     }, 400);
   }
