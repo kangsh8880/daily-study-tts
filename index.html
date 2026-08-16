@@ -9,8 +9,9 @@
     body{background:#1a1a2e;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Malgun Gothic',Arial,sans-serif;}
     .card{background:#16213e;border-radius:18px;padding:28px 24px;text-align:center;max-width:340px;width:92%;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
     .lang-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:14px;}
-    .text-box{font-size:20px;color:#e8e8e8;margin:10px 0 6px;line-height:1.5;word-break:break-all;min-height:40px;}
-    .pron{font-size:13px;color:#8899AA;margin-bottom:16px;}
+    .text-box{font-size:20px;color:#e8e8e8;margin:10px 0 4px;line-height:1.5;word-break:break-all;min-height:40px;}
+    .pron-eng{font-size:15px;color:#F9A825;font-weight:600;margin-bottom:6px;min-height:20px;letter-spacing:0.5px;}
+    .pron{font-size:12px;color:#8899AA;margin-bottom:16px;min-height:16px;}
     .btn{background:#0f3460;color:#fff;border:none;border-radius:12px;padding:13px 32px;font-size:15px;cursor:pointer;width:100%;transition:background 0.2s;}
     .btn:active{background:#1a5276;}
     .status{font-size:12px;margin-top:12px;height:18px;}
@@ -21,23 +22,27 @@
 <div class="card">
   <div class="lang-badge" id="badge"></div>
   <div class="text-box" id="textDisplay"></div>
+  <div class="pron-eng" id="pronEngDisplay"></div>
   <div class="pron" id="pronDisplay"></div>
   <button class="btn" id="playBtn" onclick="playNow()">&#9654; 발음 듣기</button>
   <div class="status" id="status"></div>
 </div>
 <script>
 var p = new URLSearchParams(location.search);
-var rawText = p.get('text') || '';
-var lang    = p.get('lang') || 'ko';
-var auto    = p.get('auto') === '1';
+var rawText  = p.get('text') || '';
+var lang     = p.get('lang') || 'ko';
+var auto     = p.get('auto') === '1';
+var proxyUrl = p.get('proxy') || '';
+var rawPron  = p.get('pron') || '';  // 영어 발음 표기 (그룹B)
 
 var decoded = '';
 try { decoded = decodeURIComponent(rawText); } catch(e){ decoded = rawText; }
 
-// 발음용: 괄호 안 텍스트 제거 (모든 언어 공통)
-var cleaned = decoded.replace(/\([^)]*\)/g, '').replace(/\s{2,}/g, ' ').trim();
+var pronEng = '';
+try { pronEng = rawPron ? decodeURIComponent(rawPron) : ''; } catch(e){ pronEng = rawPron; }
 
-var proxyUrl = p.get('proxy') || '';
+// 발음용: 괄호 안 텍스트 제거
+var cleaned = decoded.replace(/\([^)]*\)/g, '').replace(/\s{2,}/g, ' ').trim();
 
 var META = {
   ko: {name:'한국어', full:'ko-KR', color:'#3F51B5', bg:'#E8EAF6'},
@@ -53,7 +58,17 @@ badge.textContent = m.name;
 badge.style.background = m.bg;
 badge.style.color = m.color;
 
+// 원문 표시
 document.getElementById('textDisplay').textContent = decoded;
+
+// 영어 발음 표기 표시 (그룹B에서만 전달됨)
+var pronEngEl = document.getElementById('pronEngDisplay');
+if (pronEng) {
+  pronEngEl.textContent = '(' + pronEng + ')';
+  pronEngEl.style.color = m.color;
+} else {
+  pronEngEl.textContent = '';
+}
 
 function setStatus(msg, cls){
   var el = document.getElementById('status');
@@ -63,21 +78,16 @@ function setStatus(msg, cls){
 
 function getBestVoice(fullLang, shortLang) {
   var voices = speechSynthesis.getVoices();
-  var best = null;
 
-  // 중국어: zh-CN 우선, zh-TW 제외
   if (shortLang === 'zh') {
-    // 1순위: Google 普通话
     for(var i=0;i<voices.length;i++){
       var v=voices[i];
       if((v.lang==='zh-CN'||v.lang==='zh') && v.name.indexOf('Google')>=0) return v;
     }
-    // 2순위: 로컬 zh-CN
     for(var i=0;i<voices.length;i++){
       var v=voices[i];
       if(v.lang==='zh-CN') return v;
     }
-    // 3순위: zh 포함 (TW 제외)
     for(var i=0;i<voices.length;i++){
       var v=voices[i];
       if(v.lang.indexOf('zh')>=0 && v.lang.indexOf('TW')<0) return v;
@@ -85,7 +95,6 @@ function getBestVoice(fullLang, shortLang) {
     return null;
   }
 
-  // 일본어
   if (shortLang === 'ja') {
     for(var i=0;i<voices.length;i++){
       var v=voices[i];
@@ -98,7 +107,6 @@ function getBestVoice(fullLang, shortLang) {
     return null;
   }
 
-  // 베트남어
   if (shortLang === 'vi') {
     for(var i=0;i<voices.length;i++){
       var v=voices[i];
@@ -111,7 +119,6 @@ function getBestVoice(fullLang, shortLang) {
     return null;
   }
 
-  // 한국어/영어 기본
   for(var i=0;i<voices.length;i++){
     var v=voices[i];
     if(v.lang===fullLang && v.name.indexOf('Google')>=0) return v;
@@ -130,34 +137,38 @@ function getBestVoice(fullLang, shortLang) {
 var playCount = 0;
 var MAX_PLAY = 3;
 
-// 베트남어: GAS proxy → 고품질 Google TTS
+// 베트남어: GAS proxy → Google TTS 고품질
+// 핵심 수정: r.json() → r.text() (GAS proxy는 plain text base64 반환)
 function playViProxy(onDone) {
   if (!proxyUrl) { onDone(false); return; }
   setStatus('베트남어 TTS 로딩 중...', 'ing');
   var url = proxyUrl + '?text=' + encodeURIComponent(cleaned) + '&lang=vi';
-  fetch(url)
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      if (!data.audio) { onDone(false); return; }
-      // base64 → audio
-      var bin = atob(data.audio);
+  fetch(url, {redirect: 'follow'})
+    .then(function(r){
+      if (!r.ok) throw new Error('fetch fail');
+      return r.text();   // ← plain text base64 직접 수신
+    })
+    .then(function(base64){
+      base64 = base64.trim();
+      if (!base64 || base64 === 'error') { onDone(false); return; }
+      var bin = atob(base64);
       var bytes = new Uint8Array(bin.length);
       for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
       var blob = new Blob([bytes], {type:'audio/mpeg'});
-      var url2 = URL.createObjectURL(blob);
-      var audio = new Audio(url2);
+      var audioUrl = URL.createObjectURL(blob);
+      var audio = new Audio(audioUrl);
       document.getElementById('pronDisplay').textContent = 'Google TTS (베트남 북부 표준어)';
       function playNext(cnt){
         if(cnt >= MAX_PLAY){ onDone(true); return; }
         setStatus((cnt+1)+' / '+MAX_PLAY+' 재생 중...', 'ing');
         audio.currentTime = 0;
-        audio.play();
+        audio.play().catch(function(){ onDone(false); });
         audio.onended = function(){ playNext(cnt+1); };
-        audio.onerror = function(){ onDone(false); };
+        audio.onerror  = function(){ onDone(false); };
       }
       playNext(0);
     })
-    .catch(function(){ onDone(false); });
+    .catch(function(err){ onDone(false); });
 }
 
 function speak() {
@@ -169,12 +180,11 @@ function speak() {
     return;
   }
   playCount++;
-  setStatus((playCount) + ' / ' + MAX_PLAY + ' 재생 중...', 'ing');
+  setStatus(playCount + ' / ' + MAX_PLAY + ' 재생 중...', 'ing');
 
-  // 발음: cleaned (괄호 제거된 텍스트) 사용
   var utter = new SpeechSynthesisUtterance(cleaned);
-  utter.lang = m.full;
-  utter.rate = (lang === 'zh' || lang === 'ja') ? 0.85 : 0.9;
+  utter.lang  = m.full;
+  utter.rate  = (lang === 'zh' || lang === 'ja') ? 0.85 : 0.9;
   utter.pitch = 1.0;
 
   var voice = getBestVoice(m.full, lang);
@@ -185,12 +195,11 @@ function speak() {
     document.getElementById('pronDisplay').textContent = m.full + ' (기본 음성)';
   }
 
-  utter.onend = function(){ speak(); };
+  utter.onend  = function(){ speak(); };
   utter.onerror = function(e){
     setStatus('오류: ' + e.error, 'err');
     if (e.error !== 'interrupted') speak();
   };
-
   speechSynthesis.speak(utter);
 }
 
@@ -198,11 +207,9 @@ function playNow() {
   speechSynthesis.cancel();
   playCount = 0;
 
-  // 베트남어이고 proxy URL이 있으면 GAS proxy 우선
   if (lang === 'vi' && proxyUrl) {
     playViProxy(function(ok){
       if (!ok) {
-        // proxy 실패 시 Web Speech API 폴백
         setStatus('폴백: Web Speech API', 'ing');
         speak();
       } else {
@@ -224,15 +231,12 @@ function playNow() {
   }
 }
 
-// 자동 재생
 window.addEventListener('load', function(){
-  // 모바일: 탭 1회 탭으로 재생
   if (/Mobi|Android/i.test(navigator.userAgent)) {
     setStatus('화면을 탭하면 재생됩니다', 'ing');
     document.body.addEventListener('click', function(){ playNow(); }, {once:true});
     return;
   }
-  // PC: 자동 재생
   if (auto) {
     setTimeout(function(){
       var voices = speechSynthesis.getVoices();
