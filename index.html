@@ -10,7 +10,7 @@
     .card{background:#16213e;border-radius:18px;padding:28px 24px;text-align:center;max-width:340px;width:92%;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
     .lang-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:14px;}
     .text-box{font-size:20px;color:#e8e8e8;margin:10px 0 4px;line-height:1.5;word-break:break-all;min-height:40px;}
-    .pron-eng{font-size:15px;color:#F9A825;font-weight:600;margin-bottom:6px;min-height:20px;letter-spacing:0.5px;}
+    .pron-eng{font-size:15px;color:#ffffff;font-weight:600;margin-bottom:6px;min-height:20px;letter-spacing:0.5px;}
     .pron{font-size:12px;color:#8899AA;margin-bottom:16px;min-height:16px;}
     .btn{background:#0f3460;color:#fff;border:none;border-radius:12px;padding:13px 32px;font-size:15px;cursor:pointer;width:100%;transition:background 0.2s;}
     .btn:active{background:#1a5276;}
@@ -61,14 +61,9 @@ badge.style.color = m.color;
 // 원문 표시
 document.getElementById('textDisplay').textContent = decoded;
 
-// 영어 발음 표기 표시 (그룹B에서만 전달됨)
+// 영어 발음 표기 표시 (그룹B에서만 전달됨) - 항상 흰색
 var pronEngEl = document.getElementById('pronEngDisplay');
-if (pronEng) {
-  pronEngEl.textContent = '(' + pronEng + ')';
-  pronEngEl.style.color = m.color;
-} else {
-  pronEngEl.textContent = '';
-}
+pronEngEl.textContent = pronEng ? '(' + pronEng + ')' : '';
 
 function setStatus(msg, cls){
   var el = document.getElementById('status');
@@ -138,7 +133,8 @@ var playCount = 0;
 var MAX_PLAY = 3;
 
 // 베트남어: GAS proxy → Google TTS 고품질
-// 핵심 수정: r.json() → r.text() (GAS proxy는 plain text base64 반환)
+var _viAudio = null; // 자동재생 차단 시 재사용
+
 function playViProxy(onDone) {
   if (!proxyUrl) { onDone(false); return; }
   setStatus('베트남어 TTS 로딩 중...', 'ing');
@@ -146,10 +142,10 @@ function playViProxy(onDone) {
   fetch(url, {redirect: 'follow'})
     .then(function(r){
       if (!r.ok) throw new Error('fetch fail');
-      return r.text();   // ← plain text base64 직접 수신
+      return r.text();
     })
     .then(function(base64){
-      base64 = base64.trim();
+      base64 = base64.trim().replace(/\s/g, ''); // 개행/공백 제거
       if (!base64 || base64 === 'error') { onDone(false); return; }
       var bin = atob(base64);
       var bytes = new Uint8Array(bin.length);
@@ -157,18 +153,34 @@ function playViProxy(onDone) {
       var blob = new Blob([bytes], {type:'audio/mpeg'});
       var audioUrl = URL.createObjectURL(blob);
       var audio = new Audio(audioUrl);
+      _viAudio = audio;
       document.getElementById('pronDisplay').textContent = 'Google TTS (베트남 북부 표준어)';
+
       function playNext(cnt){
         if(cnt >= MAX_PLAY){ onDone(true); return; }
         setStatus((cnt+1)+' / '+MAX_PLAY+' 재생 중...', 'ing');
         audio.currentTime = 0;
-        audio.play().catch(function(){ onDone(false); });
         audio.onended = function(){ playNext(cnt+1); };
         audio.onerror  = function(){ onDone(false); };
+        var promise = audio.play();
+        if (promise !== undefined) {
+          promise.catch(function(){
+            // Chrome 자동재생 차단 → 버튼 클릭 대기
+            setStatus('▶ 버튼을 눌러 재생하세요', 'ing');
+            var btn = document.getElementById('playBtn');
+            btn.style.background = '#1B5E20';
+            btn.onclick = function(){
+              btn.style.background = '';
+              btn.onclick = function(){ playNow(); };
+              audio.play();
+              audio.onended = function(){ playNext(cnt+1); };
+            };
+          });
+        }
       }
       playNext(0);
     })
-    .catch(function(err){ onDone(false); });
+    .catch(function(){ onDone(false); });
 }
 
 function speak() {
