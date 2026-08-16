@@ -129,9 +129,10 @@ function getBestVoice(fullLang, shortLang) {
   return null;
 }
 
-var playCount = 0;
-var MAX_PLAY  = 3;
-var isMobile  = /Mobi|Android/i.test(navigator.userAgent);
+var playCount      = 0;
+var MAX_PLAY       = 3;
+var isMobile       = /Mobi|Android/i.test(navigator.userAgent);
+var _currentViAudio = null;  // 이중 재생 방지용
 
 // Google 베트남어 음성 탐색
 function findGoogleViVoice() {
@@ -161,6 +162,7 @@ function playViProxy(onDone) {
       for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
       var blob = new Blob([bytes], {type: 'audio/mpeg'});
       var audio = new Audio(URL.createObjectURL(blob));
+      _currentViAudio = audio;  // 이중 재생 방지용 참조 저장
       document.getElementById('pronDisplay').textContent = 'Google TTS - 베트남 북부 표준어';
       function playNext(cnt) {
         if (cnt >= MAX_PLAY) { onDone(true); return; }
@@ -245,6 +247,8 @@ function playVietnamese(fromUser) {
 
 // fromUser: true = 버튼 직접 클릭, false/undefined = 자동 실행
 function playNow(fromUser) {
+  // 기존 Vietnamese proxy 오디오 강제 중지 (이중 재생 방지)
+  if (_currentViAudio) { _currentViAudio.pause(); _currentViAudio = null; }
   speechSynthesis.cancel();
   playCount = 0;
 
@@ -264,8 +268,8 @@ function playNow(fromUser) {
 
 window.addEventListener('load', function(){
   if (isMobile) {
-    setStatus('화면을 탭하면 재생됩니다', 'ing');
-    document.body.addEventListener('click', function(){ playNow(true); }, {once:true});
+    // body 클릭 리스너 제거 → 버튼 onclick만 사용 (이중 재생 방지)
+    if (auto) setStatus('▶ 버튼을 눌러 재생하세요', 'ing');
     return;
   }
   if (auto) {
