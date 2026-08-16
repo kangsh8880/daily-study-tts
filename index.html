@@ -24,7 +24,7 @@
   <div class="text-box" id="textDisplay"></div>
   <div class="pron-eng" id="pronEngDisplay"></div>
   <div class="pron" id="pronDisplay"></div>
-  <button class="btn" id="playBtn" onclick="playNow()">&#9654; 발음 듣기</button>
+  <button class="btn" id="playBtn" onclick="playNow(true)">&#9654; 발음 듣기</button>
   <div class="status" id="status"></div>
 </div>
 <script>
@@ -207,50 +207,49 @@ function speak(forceVoice) {
 }
 
 // 베트남어 재생 분기
-// - PC: Chrome 내장 Google Tiếng Việt 음성 우선 (자연스러움)
-// - 모바일: GAS proxy 우선 (북부 표준어 고음질)
-function playVietnamese() {
+// - 모바일: GAS proxy 우선 (탭 제스처 있음)
+// - PC 자동: 버튼 클릭 유도 (Chrome 자동재생 차단 방지)
+// - PC 클릭: Google 음성 또는 proxy 실행
+function playVietnamese(fromUser) {
+  var btn = document.getElementById('playBtn');
+
   if (isMobile) {
-    // 모바일: proxy 우선
     playViProxy(function(ok){ if (!ok) speak(); });
     return;
   }
 
   // PC: Google 베트남어 음성 탐색
-  function tryWithVoices() {
-    var gVoice = findGoogleViVoice();
-    if (gVoice) {
-      document.getElementById('pronDisplay').textContent = gVoice.name;
-      setStatus('Google 음성으로 재생', 'ing');
-      speak(gVoice);
-    } else {
-      // Google 음성 없으면 proxy 시도
-      if (proxyUrl) {
-        playViProxy(function(ok){ if (!ok) speak(); });
-      } else {
-        speak();
-      }
-    }
+  var gVoice = findGoogleViVoice();
+  if (gVoice) {
+    btn.style.background = '';
+    document.getElementById('pronDisplay').textContent = gVoice.name;
+    speak(gVoice);
+    return;
   }
 
-  var voices = speechSynthesis.getVoices();
-  if (voices.length === 0) {
-    setStatus('음성 로딩 중...', 'ing');
-    speechSynthesis.onvoiceschanged = function(){
-      speechSynthesis.onvoiceschanged = null;
-      tryWithVoices();
-    };
+  if (proxyUrl) {
+    if (!fromUser) {
+      // 자동 실행 → 버튼 클릭 유도 (audio.play() 자동재생 차단 방지)
+      setStatus('▶ 버튼을 눌러 베트남어를 재생하세요', 'ing');
+      document.getElementById('pronDisplay').textContent = 'Google TTS 준비 완료';
+      btn.style.background = '#1B5E20';
+      return;
+    }
+    // 사용자 클릭 → proxy 실행 (제스처 있어 audio.play() 허용)
+    btn.style.background = '';
+    playViProxy(function(ok){ if (!ok) speak(); });
   } else {
-    tryWithVoices();
+    speak();
   }
 }
 
-function playNow() {
+// fromUser: true = 버튼 직접 클릭, false/undefined = 자동 실행
+function playNow(fromUser) {
   speechSynthesis.cancel();
   playCount = 0;
 
   if (lang === 'vi') {
-    playVietnamese();
+    playVietnamese(fromUser);
     return;
   }
 
@@ -264,16 +263,16 @@ function playNow() {
 }
 
 window.addEventListener('load', function(){
-  if (/Mobi|Android/i.test(navigator.userAgent)) {
+  if (isMobile) {
     setStatus('화면을 탭하면 재생됩니다', 'ing');
-    document.body.addEventListener('click', function(){ playNow(); }, {once:true});
+    document.body.addEventListener('click', function(){ playNow(true); }, {once:true});
     return;
   }
   if (auto) {
     setTimeout(function(){
       var voices = speechSynthesis.getVoices();
-      if (voices.length > 0) { playNow(); }
-      else { speechSynthesis.onvoiceschanged = function(){ speechSynthesis.onvoiceschanged=null; playNow(); }; }
+      if (voices.length > 0) { playNow(false); }
+      else { speechSynthesis.onvoiceschanged = function(){ speechSynthesis.onvoiceschanged=null; playNow(false); }; }
     }, 400);
   }
 });
