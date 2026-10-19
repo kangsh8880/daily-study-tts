@@ -34,7 +34,8 @@ var lang     = p.get('lang') || 'ko';
 var auto     = p.get('auto') === '1';
 var proxyUrl = p.get('proxy') || '';
 var rawPron  = p.get('pron') || '';  // 영어 발음 표기 (그룹B)
-var ttsRate  = parseFloat(p.get('rate') || '0');  // 재생 속도 (0이면 기본값 사용)
+var ttsRate  = parseFloat(p.get('rate') || '0');  // 재생 속도 (0이면 기본값)
+var wordGap  = parseInt(p.get('wordgap') || '0'); // 단어 간격 ms (0이면 기본)
 
 var decoded = '';
 try { decoded = decodeURIComponent(rawText); } catch(e){ decoded = rawText; }
@@ -178,6 +179,35 @@ function playViProxy(onDone) {
     .catch(function(){ onDone(false); });
 }
 
+// 한국어 단어 간격 확장 재생 (wordGap > 0 일 때)
+// 단어별로 끊어 읽고 사이에 명시적 쉬는 시간 삽입
+function speakWordByWord(words, voice, wordIdx, round) {
+  if (wordIdx >= words.length) {
+    // 한 회차 완료
+    round++;
+    if (round < MAX_PLAY) {
+      setStatus(round + ' / ' + MAX_PLAY + ' 재생 중...', 'ing');
+      setTimeout(function(){ speakWordByWord(words, voice, 0, round); }, wordGap * 3);
+    } else {
+      setStatus('재생 완료 (' + MAX_PLAY + '회)', 'ok');
+      if (auto && !isMobile) setTimeout(function(){ window.close(); }, 600);
+    }
+    return;
+  }
+  var utter = new SpeechSynthesisUtterance(words[wordIdx]);
+  utter.lang  = m.full;
+  utter.rate  = 0.9;  // 단어 발음은 자연스러운 속도 유지
+  utter.pitch = 1.0;
+  if (voice) utter.voice = voice;
+  utter.onend = function(){
+    setTimeout(function(){ speakWordByWord(words, voice, wordIdx + 1, round); }, wordGap);
+  };
+  utter.onerror = function(){
+    setTimeout(function(){ speakWordByWord(words, voice, wordIdx + 1, round); }, wordGap);
+  };
+  speechSynthesis.speak(utter);
+}
+
 // Web Speech API 재생 (지정 voice 또는 자동 탐색)
 function speak(forceVoice) {
   if (playCount >= MAX_PLAY) {
@@ -185,6 +215,22 @@ function speak(forceVoice) {
     if (auto && !isMobile) setTimeout(function(){ window.close(); }, 600);
     return;
   }
+
+  var voice = forceVoice || getBestVoice(m.full, lang);
+  if (voice) {
+    document.getElementById('pronDisplay').textContent = voice.name;
+  } else {
+    document.getElementById('pronDisplay').textContent = m.full + ' (기본 음성)';
+  }
+
+  // 한국어 + 단어 간격 모드: 단어별 끊어 읽기
+  if (lang === 'ko' && wordGap > 0) {
+    var words = cleaned.split(/\s+/).filter(function(w){ return w.length > 0; });
+    setStatus('1 / ' + MAX_PLAY + ' 재생 중...', 'ing');
+    speakWordByWord(words, voice, 0, 0);
+    return;
+  }
+
   playCount++;
   setStatus(playCount + ' / ' + MAX_PLAY + ' 재생 중...', 'ing');
 
@@ -192,14 +238,7 @@ function speak(forceVoice) {
   utter.lang  = m.full;
   utter.rate  = (ttsRate > 0) ? ttsRate : ((lang === 'zh' || lang === 'ja') ? 0.85 : 0.9);
   utter.pitch = 1.0;
-
-  var voice = forceVoice || getBestVoice(m.full, lang);
-  if (voice) {
-    utter.voice = voice;
-    document.getElementById('pronDisplay').textContent = voice.name;
-  } else {
-    document.getElementById('pronDisplay').textContent = m.full + ' (기본 음성)';
-  }
+  if (voice) utter.voice = voice;
 
   utter.onend  = function(){ speak(forceVoice); };
   utter.onerror = function(e){
